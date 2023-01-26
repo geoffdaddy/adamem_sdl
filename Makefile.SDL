@@ -12,15 +12,15 @@ LD	= $(CROSS_COMPILE)gcc	# Linker used
 AS      = $(CROSS_COMPILE)gcc   # Assembler used
 
 CFLAGS	= -Wall -Wformat=0 -O2 -fomit-frame-pointer -IIDE \
-          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DIDEHD
+          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DIDEHD -I/usr/include/SDL2
 ASFLAGS = -Wall -c
 
-OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.o Bitmap.o HarddiskIDE.o scale2x.o
+OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.o Bitmap.o HarddiskIDE.o sms_ntsc.o
 
 all:    adamem cvem keys z80dasm snapedit
 
 adamem: $(OBJECTS)
-	$(LD) -s -o adamem $(OBJECTS) -lz `sdl-config --libs`
+	$(LD) -s -o adamem $(OBJECTS) -lz `sdl2-config --libs` -lm
 
 cvem: adamem
 	rm -f cvem
@@ -55,4 +55,4 @@ Sound.o:    Sound.c Coleco.h Sound.h
 HarddiskIDE.o:
 	    $(CC) $(CFLAGS) -c IDE/HarddiskIDE.c
 
-scale2x:    scale2x.c
+sms_ntsc.o:    sms_ntsc.c
