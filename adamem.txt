@@ -1,0 +1,554 @@
+                          ******* ADAMEm *******
+                     The Portable Coleco ADAM Emulator
+                                Version 1.9
+                                     
+                 Copyright (C) 1996-1999  Marcel de Kogel
+		 SDL Driver Copyright (C) 2006-2016  Geoff Oltmans
+
+Hardware and Software Requirements
+==================================
+MS-DOS version:
+ A 486SX-25 or better
+ A VLB- or PCI-based VGA compatible video card
+ An enhanced keyboard (101 or 102 keys)
+ MS-DOS version 3.0 or higher
+ A 486DX-33 with a SoundBlaster compatible sound card and a joystick is
+ recommended
+ To compile the MS-DOS version, you'll need DJGPP 2.0 or higher, ZLIB
+ recommended
+Linux/SVGALib version:
+ A 486DX-33 (486DX2-66 recommended)
+ A VLB- or PCI-based VGA compatible video card
+ An enhanced keyboard (101 or 102 keys)
+ SVGALib version 1.2.10 or higher
+ ZLIB recommended
+ Sound and joystick drivers supported
+Unix/X version:
+ A 486DX-66 or equivalent (P66 recommended)
+ An X-Windows server running in 8, 16 or 32 bpp mode
+ X11 revision 6 or higher
+ ZLIB recommended
+ USS(/Lite) sound system and Linux joystick driver supported
+
+SDL version:
+ A machine compatible with libSDL
+ ZLIB recommended
+ Up to two joysticks are supported
+
+ZLIB is a general-purpose data compression library used by ADAMEm to
+support GZIPped disk, tape and ROM images. ZLIB is available on the ZLIB
+home page at http://quest.jpl.nasa.gov/zlib/
+
+Files included
+==============
+adamem     The emulator
+cvem       A link starting the emulator in ColecoVision mode
+adamem.snd The sound data used by the emulator
+adamem.txt This file
+OS7.rom    ColecoVision OS ROM image
+WP.rom     SmartWRITER ROM image
+EOS.rom    Elementary Operating System ROM image
+keys       Program to alter key mappings for game controller #1
+CWSDMI.ZIP (MS-DOS version only) A DPMI server required by ADAMEm MS-DOS.
+           If you don't run ADAMEm MS-DOS in a DPMI environment (OS/2, MS-
+           Windows, Linux DOSEmu, QDPMI, ...), put CWSDPMI.EXE included in
+           this archive somewhere in your path or in the emulator's
+           directory
+Some utilities for use with ADAMEm can be found on the ADAMEm distribution
+site at http://www.komkon.org/~dekogel/adamem.html
+
+What's emulated
+===============
+- 4 disk drives
+- 4 tape drives
+- 1 ADAM printer
+- 1 Parallel port
+- 1 RAM expander, with a configurable amount of memory.
+- 2 ColecoVision game controllers
+- (Optional) 1 Roller controller, 1 Driving module, 1 Super Action
+  controller
+- MicroInnovations-style IDE hard disk emulation
+- Dummy registers to "emulate" the MIDIMite interface, enough to allow SEQuel software to
+  operate.
+ 
+
+Key Mappings
+============
+ADAM keyboard:
+F1-F6        -  Smart keys
+F7           -  WILD CARD
+F8           -  UNDO
+Insert       -  INSERT
+Delete       -  DELETE
+Home         -  MOVE/COPY
+End          -  STORE/GET
+Page Up      -  CLEAR
+Page Down    -  PRINT
+Keypad 5     -  HOME
+ColecoVision game controllers:
+Cursor keys             - Joystick movement
+Left Alt (Space in      - Primary firing button
+Unix/X version)
+Left Ctrl               - Secondary firing button
+Left Shift              - Third firing button (port 1)
+Z                       - Fourth firing button (port 1)
+NumPad -                - Third firing button (port 2)
+NumPad +                - Fourth firing button (port 2)
+0-9, -, =               - Numpad 1
+0-9, Del, Enter(right)  - Numpad 2
+Special Keys:
+F9                      -  Toggle joystick/keyboard mode. In joystick
+                           mode, the keyboard is used to emulate the
+                           ColecoVision game controllers. In keyboard
+                           mode, it is used to emulate the ADAM keyboard
+F1-F4                   -  Toggle sound channel 1-4 on/off (Joystick mode
+                           only)
+F5                      -  Toggle sound on/off (Joystick mode only)
+F11                     -  Decrease sound volume
+F12                     -  Increase sound volume
+Alt+F9                  -  Switch between 80 and 40-column mode, if TDOS
+                           is running (MS-DOS only)
+Ctrl+F9                 -  Change options
+F7 (Alt+F7 in keyboard  -  Make snapshot
+mode)
+F8 (Alt+F8 in keyboard  -  Make screen shot (Not implemented in Unix/X
+mode)                      version)
+Ctrl+F11                -  Pause & Blank screen
+Ctrl+F12                -  Pause
+Insert                  -  Switch to joystick emulation mode 1 (Joystick
+                           mode only). For a description of the available
+                           joystick emulation modes, check the description
+                           of the -joystick command line option
+Home                    -  Switch to joystick emulation mode 2 (Joystick
+                           mode only)
+Page Up                 -  Switch to joystick emulation mode 3 (Joystick
+                           mode only)
+Delete                  -  Swap joystick buttons (Joystick mode only)
+End                     -  Swap keyboard buttons (Joystick mode only)
+Page Down               -  Swap mouse buttons (Joystick mode only)
+Alt+F12                 -  Main reset lever
+Alt+F11                 -  Cartridge reset lever
+F10                     -  Quit emulator
+
+Command line options
+====================
+General options:
+-help                  -  Print a help page describing the available
+                          options
+-verbose <flags>       -  Select debugging messages [0]
+                            0 - Silent          1 - Startup messages
+                            2 - VDP             4 - Memory mapper
+                            8 - Tape&Disk      16 - PCB
+                          128 - Illegal Z80 ops
+-adam / -cv            -  Select emulation model
+                          -adam - Coleco ADAM
+                          -cv   - ColecoVision
+                          Default is -adam for adamem, -cv for cvem
+-os7 <file>            -  Select ColecoVision ROM image [OS7.rom]
+-eos <file>            -  Select EOS ROM image [EOS.rom]
+-wp <file>             -  Select SmartWriter ROM image [WP.rom]
+-ram <value>           -  Select number of 64K expansion RAM pages [1]
+-exp <file>	       -  Select Slot 2 Expansion ROM image [EXP.rom]
+-diska, -diskb,        -  Select disk/tape images to use [none]
+-diskc, -diskd,
+-tapea, -tapeb,
+-tapec, -taped
+<filename>
+-idea <filename>       -  Select ide master hard drive image to use [hd_ide1.img]
+-ideb <filename>       -  Select ide slave hard drive image to use  [hd_ide2.img]
+-snap <filename>       -  Load snapshot file [none]
+-autosnap <mode>       -  Set snapshot mode [0]
+                          0 - Manual
+                          1 - Automatically load snapshot at start-up,
+                              and write snapshot at shutdown
+-diskspeed <value>     -  Set time it takes to read one block in ms [100]
+-tapespeed <value>     -  Set time it takes to read one block in ms [100]
+-printer <filename>    -  Select file to log printer output
+                          Default is PRN in the MS-DOS version, stdout in
+                          the Unix versions
+-printertype <value>   -  Select printer type [1]
+                          0 - ADAM Printer compatible
+                          1 - Generic/Text only
+                          2 - IBM Graphics compatible
+                          3 - Qume SPRINT 11 compatible
+-lpt <filename>        -  Select file to log parallel port output
+                          Default is PRN in the MS-DOS version, stdout in
+                          the Unix versions and SDL
+-cpuspeed <percentage> -  Set Z80 CPU speed [100%]
+                          You won't normally need to use this option. If
+                          you've got a slow system however, you may be
+                          able to speed up some applications by lowering
+                          the CPU speed to 60%-80%
+-ifreq <frequency>     -  Set interrupt frequency [50Hz]
+                          Default interrupt frequency is 50Hz for a PAL
+                          system, and 60Hz for an NTSC system. If you
+                          find most of your applications running a bit
+                          too slow, try using -ifreq 60
+-sync <mode>           -  Select sync mode [1]
+                          0 - Do not sync emulation
+                          1 - Sync emulation on every VDP interrupt
+                          Using -sync 0 will let the emulator run at full
+                          speed. If you're not using games, you may want
+                          to use this option
+-cheat <code>          -  Apply cheat code to cartridge ROM. Code is a 24-
+                          bit hexadecimal number. Bits 8-15 are the
+                          address to be patched, bits 0-7 the new value.
+                          e.g., -cheat 02CE00 will write the value 0x00
+                          to address 0x02CE in the cartridge ROM, giving
+                          you infinite lives in Zaxxon.
+                          Up to 16 cheat codes are supported.
+-expansion <mode>      -  Select expansion module emulation [0]
+                          0 - Do not emulate expansion modules
+                          1 - Emulate a roller controller with the mouse.
+                              Use your mouse buttons to press one of the
+                              first two roller controller buttons, use
+                              the ctrl and alt keys to press one of the
+                              second roller controller buttons
+                          2 - Emulate a roller controller with an
+                              analogue joystick
+                          3 - Emulate a driving module with an analogue
+                              joystick. Move your joystick forward to
+                              press the accelerator pedal, move your
+                              joystick to left or to the right to move
+                              the steering wheel, use the cursor keys or
+                              the joystick buttons to move the control
+                              stick
+                          4 - Emulate a driving module with a mouse.
+                              Press a mouse button to press the
+                              accelerator pedal, use the cursor keys to
+                              move the control stick
+                          5 - Emulate a super controller speed roller on
+                              both ports with a mouse. The third and
+                              fourth firing buttons of the super action
+                              controllers are always emulated.
+                          6 - Emulate a speed roller on port 1 with a
+                              mouse
+                          7 - Emulate a speed roller on port 2 with a
+                              mouse
+                          Please note that mouse support is currently
+                          only implemented in the MS-DOS version
+Controller options:
+-joystick <mode>       -  Select joystick mode [1]
+                          0 - No joystick support
+                          1 - Joystick support
+                          2 - Joystick emulates game controller #2
+                          3 - Joystick emulates game controller #1
+                          In joystick mode 1, both the keyboard and the
+                          joystick emulate both ColecoVision game ports.
+                          For head to head games, you'll have to use
+                          either -joystick 2 or -joystick 1
+-sensitivity <value>   -  Select mouse/joystick sensitivity [200]
+                          1 - Maximum   1000 - Minimum
+                          Use this option if you're having trouble
+                          controlling the roller controller or driving
+                          module. Useful values are between 150 and 400
+-swapbuttons <flags>   -  Swap/Do not swap buttons [0]
+                          1 - Swap joystick buttons
+                          2 - Swap keyboard buttons
+                          4 - Swap mouse buttons
+                          For the joystick and the mouse, only buttons A
+                          and B are swapped
+-keypad <mode>         -  Select numeric keypad operation [0]
+                          0 - Normal   1 - Reversed
+                          This option might be useful for games that use
+                          game controller overlays, like War Games
+-calibrate <mode>      -  Force/Do not force joystick calibration [0]
+                          0 - Do not force joystick calibration
+                          1 - Force joystick calibration
+                          Normally, the emulator loads the joystick
+                          settings from a file when it has been
+                          calibrated before. If you connected a new
+                          joystick, or you changed your joystick
+                          settings, and you're having trouble controlling
+                          your joystick, try using -calibrate 1
+-keys <string>         -  Alter key mappings
+                          You can use the "keys" program to get the
+                          syntax necessary for your favourite key mapping
+Video options:
+-uperiod <value>       -  Set maximum number of interrupts per screen
+                          update [3]
+                          If you are using a slow system, you may prefer
+                          using -uperiod 2 or -uperiod 1. This will
+                          probably slow down emulation, but emulation
+                          will be much smoother
+-sprite <mode>         -  Select sprite emulation method [0]
+                          0 - Show all sprites
+                          1 - Don't show more than 4 sprites per row
+                          While many applications will suffer from heavy
+                          sprite flicker when using -sprite 1, some
+                          applications require the option for best
+                          display results
+-video <mode>          -  Select video mode [0] (Not implemented in
+                          Unix/X version)
+                          MS-DOS version:
+                          0 - 320x200    1 - 256x192
+                          2 - 256x240
+                          Linux/SVGALib version:
+                          0 - 320x200    1 - 320x240
+                          Please note that video modes 1 and 2 may not
+                          work on every system
+			  SDL version:
+			  1 - 256x212    2 - 256x424
+			  3 - 1280x720   4 - 1920x1080
+-palette <mode>        -  Select colour palette to be used [0]
+                          0 - Default
+                          1 - V9938
+-overscan <mode>       -  Emulate/Do not emulate overscan colour [1] (Not
+                          implemented in Unix/X version)
+                          0 - Do not emulate overscan colour
+                          1 - Emulate overscan colour
+                          Since overscan colours show quite differently
+                          on a television set compared to a VGA monitor,
+                          you may want to turn emulation of it off
+-chipset <value>       -  Select video chipset [1] (Linux/SVGALib only)
+                          0 - VGA        1 - Autodetect
+                          If you are having video related problems, using
+                          -chipset 0 might solve your problems
+-tdos <mode>           -  Select default TDOS video mode [0] (MS-DOS
+                          only)
+                          0 - 40 column
+                          1 - 80 column
+Sound options:
+-soundtrack <file>     -  Select file for sound logging [none]
+-sound <mode>          -  Select sound mode [255]
+                          MS-DOS version:
+                          0 - No sound       1 - PC Speaker
+                          2 - Adlib          3 - Adlib + SoundBlaster
+                          4 - SoundBlaster   5 - GUS
+                          6 - SB AWE32     255 - Detect
+                          The emulator uses the BLASTER environment
+                          variable to 'detect' the presence of a Sound
+                          Blaster. Some older Sound Blaster cards are not
+                          supported. Make sure your BLASTER setting is
+                          right or you may crash your system when running
+                          the emulator. The syntax of the BLASTER
+                          environment variable is: BLASTER=Aaaa Ii Dd Hh
+                          Tt Eeee, where aaa is the port address
+                          (default=220), i is the interrupt used
+                          (default=7 or 5, depending on the model you
+                          have), d is the DMA channel used (default=1), h
+                          is the high DMA channel used (SB16/AWE32 only,
+                          default=5), t is the model type (4=SB Pro,
+                          5=SB16, 6=AWE32) and eee is the EMU baseport
+                          (AWE32 only, default=620). All other settings
+                          are ignored. If you have a GUS compatible sound
+                          card, make sure your ULTRASND environment
+                          variable is set correctly. It's syntax is:
+                          ULTRASND=Port,DMA,Record DMA,IRQ,MIDI IRQ. Only
+                          the Port parameter is used by the emulator.
+                          You might want to use -sound 3 if you have a
+                          slow system or a system with an 8-bit sound
+                          card
+                          Unix versions:
+                          0   - No sound
+                          1   - USS(/Lite) /dev/dsp
+                          255 - Detect
+-reverb <level>        -  Select reverb send level (SB, SB AWE32 and
+                          /dev/dsp only) [7]
+                          0 - Minimum  100 - Maximum
+-chorus <level>        -  Select chorus send level (SB AWE32 only) [0]
+                          0 - Minimum  100 - Maximum
+-stereo <level>        -  Select stereo panning level (SB, SB AWE32 and
+                          /dev/dsp only) [0]
+                          0 - Mono     100 - Maximum
+                          Useful values are from 0 to about 60
+-soundquality <value>  -  Select sound quality (SoundBlaster and /dev/dsp
+                          only) [3]
+                          1 - Lowest     5 - Highest
+                          While using higher sound qualities will improve
+                          sound output quite a lot, it will also cause a
+                          considerable slowdown if you're using a slow
+                          (486) machine
+-speakerchannels       -  Select PC Speaker channel list (PC Speaker
+<channel list>            only) [4,3,2,1]
+                          If you don't have a sound card, and sound
+                          quality is extremely poor, try messing with
+                          this option a bit. Useful alternatives include
+                          1,2,3 and 2,3,1
+-volume <level>        -  Select initial volume [10]
+                          0 - Silent    15 - Maximum
+Miscellaneous options:
+-shm <mode>            -  Use/Don't use MITSHM extensions for X [1] (X-
+                          Windows version only)
+                          0 - Don't use SHM   1 - Use SHM
+                          Using SHM greatly speeds up emulation, but may
+                          not be compatible with your system
+-savecpu <mode>        -  Save/Don't save CPU when inactive [1] (X-
+                          Windows version only)
+                          0 - Don't save CPU   1 - Save CPU
+Many command line options may be abbreviated. Use the -help options to get
+a list of currently supported abbreviations
+
+Screenshot and snapshot files
+=============================
+Screenshots will be saved as <filename.bXX>, where filename is the name of
+the disk, tape or cartridge image. XX is an increasing number, e.g. if the
+latest screenshot taken is DKONG.B03, the next will be DKONG.B04.
+Snapshots will be saved as <filename.sXX>.
+When you use the "-autosnap 1" option, e.g. to save the highscores in a
+ColecoVision game, the snapshot that is automatically loaded and saved is
+<filename.snp>.
+
+TDOS
+====
+TDOS is a freeware CP/M compatible operating system for the Coleco ADAM.
+It can run in 40-column mode on an ADAM, or in 80-column mode on 80-column
+mode adapters.
+ADAMEm does not support 80-column mode adapters. When ADAMEm runs TDOS in
+80-column mode, it copies the internal video buffer to the display at
+every VDP interrupt. TDOS itself does not know it runs in 80-column mode,
+so if you e.g. do a DIR, only half of the screen will be used.
+To run TDOS in 80-column mode, you can either use the "-tdos 1" command
+line option, or press ALT+F9 when TDOS is running.
+
+The sound files
+===============
+Somewhere in 1997, Todd Aiken convinced me the sound emulation of ADAMEm
+could be made a lot better. Until then, ADAMEm used samples from real
+ColecoVision games. Todd wanted to make his own samples, but he failed a
+program to generate the tones and noises.
+I started coding one. When it was finished, I programmed the EPROMs and
+made new samples from my own ColecoVision. While this improved the sound
+quite a bit, Todd still wasn't satisfied. Todd replaced the EPROMs on one
+of his Donkey Kong cartridges with EPROM sockets, programmed the Noise
+Generator EPROMs and sampled the ColecoVision at his home. After filtering
+them using Cool Edit, he sent the samples to me.
+I looped the samples and imported them in ADAMEm. The sounds had become
+better, but there was too much filtering, especially in the lower
+frequency ranges. Todd made new samples, of different tones. I looped
+them, but made the loops much larger. The results were great. ADAMEm 1.0
+sounds as close to a real ColecoVision as you can get.
+
+Soundtrack file format
+======================
+The soundtrack file format is as follows:
+Header:
+string         'Coleco Sound File',0x1A
+word           Version number (LSB first, currently 0x101 for 1.01)
+byte           Interrupt frequency in hertz
+Data:
+0xFF           Single interrupt mark
+0xFE <n(byte)> Interrupt mark
+0xFD <n(word)> Interrupt mark (LSB first)
+0xFC <byte>    Change interrupt frequency
+0x00-0x7F      Write to a sound register. High nibble is the register
+               number, low nibble is the register value. Registers 0,2 and
+               4 are 12 bits wide (lower 8 bits are in second byte), all
+               others are 4 bits wide
+Example: 13 FF 20 04 56 FD 05 01 45 06
+          ^--------------------------- Write 3 to register 1
+             ^------------------------ Interrupt
+                ^--------------------- Write 004 to register 2
+                      ^--------------- Write 6 to register 5
+                         ^------------ 261 Interrupts
+                                  ^--- Write 506 to register 4
+
+Configuration files
+===================
+The emulator loads two configuration files (if present) before it loads a
+cartridge ROM: adamem.cfg or cvem.cfg located in the emulator's directory
+and CART.cfg (e.g. DKONG.cfg) located in the cartridge dump's directory.
+These are plain text files containing optional command line options.
+Options can be separated with spaces, tabs or returns.
+
+The SDL driver allows remapping of joystick buttons. The driver will support 
+the entire range of allowable Coleco Vision buttons (including the keypad) 
+provided a controller is detected with the proper number of buttons. The format 
+of the configuration file is a simple text file with a set of comma separated pairs 
+of source button to target button on each line. So for example if you wanted to 
+map host controller button 0 to the fire button, you would enter 0,f. For host 
+button 1 to the aim button, 0,a. , adamem.joy is as follows: 
+
+	0-9 - keypad buttons
+	* - * on keypad
+	# - # on keypad
+	f - fire
+	a - aim
+	c - SAC button 3
+	d - SAC button 4
+	s - shift button for emulator functions
+	r - computer reset
+	p - toggle pause
+	g - game reset
+	q - quit emulator
+
+It is possible to remap several host system buttons to the same target Coleco Vision 
+joystick button. Just enter a separate line for each. The button selected for the "shift"
+button allows the use of the additional emulator functions on joystick 1, namely computer
+reset, game reset, pause, and quit. This works by holding down the shift button and the
+corresponding button for the desired function. If they are held down for 3 seconds the
+emulator will execute the requested function.
+
+Notes about SDL Version
+=======================
+
+Currently the emulator will confine the mouse pointer to the emulator window on
+the host OS while unpaused. This is intentional and is part of the spinner 
+emulation. In order to free the mouse pointer, you must pause the emulator with
+one of the pause key combinations, or by using the shifted pause function on a
+joystick (see above section for details).
+
+History
+=======
+1.9  01-27-2016	  - Improved joystick emulation including support for 	
+		    spinner controllers (super action controller, roller
+		    controller)
+		  - fixes for sound emulation.
+		  - fix emulator lockup issue while running for longer than
+		    ~30 minutes.
+1.81 18-05-2015   - New sound emulation with rudimentary Yamaha PSG support 		    
+		    (to emulate the "Super Game Module"), improved joystick 		    
+		    handling in SDL driver (experimental)
+1.0  23-02-1999   - Replaced sound files and improved sound emulation
+                  - Replaced Marat Fayzullin's Z80 emulation code with
+                    Z80Em. Z80Em is a portable Z80 emulator, written by
+                    myself.
+                  - Improved ADAMNet emulation
+                  - Replaced the colour palette. The palette used in older
+                    versions can still be used with the "-palette 1"
+                    option
+                  - Added parallel port emulation
+                  - Added expansion RAM support
+                  - Added snapshot support
+                  - Added 80-column TDOS support
+                  - Added cheat-code support
+                  - Added reverb and stereo support for SoundBlaster Pro
+                    and SoundBlaster 16 compatibles
+                  - Fixed some minor bugs
+0.2  15-11-1996   Completely rewrote VDP emulation engine; it now has
+                  support for sprite clipping, detection of 5th sprite in
+                  a row and non-standard screen modes, added support for
+                  GZIPped disk images, added ADAM printer control code
+                  emulation, added Unix/X and Linux/SVGALib ports, fixed
+                  some bugs
+0.1  28-10-1996   Initial release
+
+Credits
+=======
+- Joe Blenkle, Jim Marshall, Stephen Geyer, Grant Frost and Jim Notini
+  were of invaluable help getting ADAM software and technical information.
+  Thanks!
+- Todd Aiken spent a lot of time finding bugs, many of which would have
+  never been fixed without his help. He also helped a lot improving the
+  sound output
+- Martijn Zeedijk tested the GUS routines and helped me fix lots of bugs
+- Neal Danner provided me with the sound hardware related technical
+  information on which the sound emulation code is based
+- The SB AWE32 routines are heavily based on 'The Unofficial Sound Blaster
+  AWE32 Programming Guide' written by Vince Vu a.k.a. Judge Dredd. Thanks
+  a million for writing this!
+- Some parts of the code were taken from Allegro. Allegro is a library for
+  DJGPP written by Shawn Hargreaves. Allegro is available at
+  ftp://x2ftp.oulu.fi/pub/msdos/programming/djgpp2
+- ADAMEm MS-DOS was compiled using DJ Delorie's DJGPP v2.0. DJGPP is a 32
+  bit C compiler for MS-DOS. Source code and binaries of DJGPP are
+  available at http://www.delorie.com
+- David Harley for providing the Ultimate PC Interface and testing to aid 
+  in development of better joystick and video emulation.
+
+Please send your comments to Marcel at
+dekogel@giganda.komkon.org
+
+For the SDL driver, please contact Geoff at
+oltmansg@gmail.com
+

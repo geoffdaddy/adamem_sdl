@@ -1,0 +1,58 @@
+#### Makefile for ADAMEm SDL
+# Following #defines can be used:
+# DEBUG			Compile with builtin debugger
+# LSB_FIRST		Compile for a low-endian machine
+# SOUND			Compile with sound support
+# ZLIB			Compile ZLIB version
+# SDL			Use the SDL library
+# IDEHD			Include IDE disk support
+
+CC	= $(CROSS_COMPILE)gcc	# C compiler used
+LD	= $(CROSS_COMPILE)gcc	# Linker used
+AS      = $(CROSS_COMPILE)gcc   # Assembler used
+
+CFLAGS	= -Wall -Wformat=0 -O2 -fomit-frame-pointer -IIDE \
+          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DIDEHD
+ASFLAGS = -Wall -c
+
+OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.o Bitmap.o HarddiskIDE.o scale2x.o
+
+all:    adamem cvem keys z80dasm snapedit
+
+adamem: $(OBJECTS)
+	$(LD) -s -o adamem $(OBJECTS) -lz `sdl-config --libs`
+
+cvem: adamem
+	rm -f cvem
+	ln -s adamem cvem
+
+keys.o: keys.c
+keys: keys.o
+	$(LD) -s -o keys keys.o
+
+adamem.snd: makedata
+	makedata
+
+makedata.o: makedata.c
+makedata: makedata.o
+	$(LD) -s -o makedata makedata.o -lz
+
+z80dasm.o: z80dasm.c z80dasm.h
+z80dasm: z80dasm.o
+	$(LD) -s -o z80dasm z80dasm.o -lz
+
+snapedit.o: snapedit.c
+snapedit: snapedit.o
+	$(LD) -s -o snapedit snapedit.o -lz
+
+ADAMEm.o:   ADAMEm.c Coleco.h MSDOS.h Z80.h Help.h Z80IO.h
+Coleco.o:   Coleco.c Coleco.h Z80.h Z80IO.h
+Bitmap.o:   Bitmap.c Bitmap.h
+Z80Debug.o: Z80Debug.c Z80.h Z80IO.h z80dasm.h
+Z80.o:      Z80.c Z80.h Z80CDx86.h Z80IO.h Z80DAA.h
+SDL.o:      AdamemSDL.c AdamSDLSound.c
+Sound.o:    Sound.c Coleco.h Sound.h
+HarddiskIDE.o:
+	    $(CC) $(CFLAGS) -c IDE/HarddiskIDE.c
+
+scale2x:    scale2x.c

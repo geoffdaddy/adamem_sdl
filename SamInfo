@@ -1,0 +1,35 @@
+109,217,13,10509
+218,436,16,10714
+437,873,3,10600
+874,3495,4,10349
+3496,20000,2,10423
+437,873,28,21830
+874,1500,27,19510
+1748,3000,7,20898
+3496,4500,5,21578
+6991,20000,4,20227
+437,800,8,10605
+874,1700,7,9847
+1748,3400,6,9847
+3496,6900,11,10230
+6991,20000,8,10700
+
+Format is as follows:
+ base frequency, maximum frequency, loop start, loop end
+ No spaces, no comments allowed
+Entries are:
+  1) Melody 1
+  2) Melody 2
+  3) Melody 3
+  4) Melody 4
+  5) Melody 5
+  6) White noise 1
+  7) White noise 2
+  8) White noise 3
+  9) White noise 4
+ 10) White noise 5
+ 11) Periodic noise 1
+ 12) Periodic noise 2
+ 13) Periodic noise 3
+ 14) Periodic noise 4
+ 15) Periodic noise 5

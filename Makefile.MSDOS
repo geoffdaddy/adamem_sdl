@@ -1,0 +1,58 @@
+#### Makefile for ADAMEm MS-DOS/DJGPP
+# Following #defines can be used:
+# MSDOS			Compile MSDOS version
+# DEBUG			Compile with builtin debugger
+# LSB_FIRST		Compile for a low-endian machine
+# X86_ASM		Use inline 80x86 assembly
+# SOUND			Compile with sound support
+# ZLIB			Compile ZLIB version
+
+# C compiler used
+CC = gcc
+# Linker used
+LD = gcc
+# Assembler used
+AS = gcc
+
+CFLAGS  = -Wall -O2 -fomit-frame-pointer
+CFLAGS += -DZLIB -DX86_ASM
+CFLAGS += -DMSDOS -DSOUND
+CFLAGS += -DIDEHD
+
+ASFLAGS  = -Wall -c
+
+OBJECTS  = ADAMEm.o MSDOS.o Coleco.o Z80.o Z80Debug.o Asm.o DMA.o INT.o Bitmap.o
+OBJECTS += Adlib.o AWE32.o GUS.o Combined.o DSP.o Sound.o Speaker.o
+OBJECTS += HarddiskIDE.o
+
+#### removed adamem.snd from line below because it was creating an invalid
+#### sound file
+default:  adamem.exe
+all:      adamem.exe keys.exe z80dasm.exe snapedit.exe
+
+adamem.exe: $(OBJECTS)
+	$(LD) -s -Wl,-Map,adamem.map -o runtime/msdos/adamem.exe $(OBJECTS) -lz -lemu 
+
+keys.o: keys.c
+keys.exe: keys.o
+	$(LD) -s -o runtime/msdos/keys.exe keys.o
+
+adamem.snd: makedata.exe SamInfo
+	makedata
+	cp adamem.snd runtime/msdos/adamem.snd
+	rm -f adamem.snd
+
+makedata.o: makedata.c
+makedata.exe: makedata.o
+	$(LD) -s -o makedata.exe makedata.o -lz
+
+z80dasm.o: z80dasm.c z80dasm.h
+z80dasm.exe: z80dasm.o
+	$(LD) -s -o runtime/msdos/z80dasm.exe z80dasm.o -lz
+
+snapedit.o: snapedit.c
+snapedit.exe: snapedit.o
+	$(LD) -s -o runtime/msdos/snapedit.exe snapedit.o -lz
+
+HarddiskIDE.o:
+	$(CC) $(CFLAGS) -c IDE/HarddiskIDE.c
