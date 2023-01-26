@@ -20,7 +20,7 @@ OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.
 all:    adamem cvem keys z80dasm snapedit
 
 adamem: $(OBJECTS)
-	$(LD) -s -o adamem $(OBJECTS) -lz `sdl2-config --libs` -lm
+	$(LD) -s -o adamem $(OBJECTS) -lz `sdl2-config --static-libs` -lm
 
 cvem: adamem
 	rm -f cvem
