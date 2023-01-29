@@ -12,7 +12,7 @@ LD	= $(CROSS_COMPILE)gcc	# Linker used
 AS      = $(CROSS_COMPILE)gcc   # Assembler used
 
 CFLAGS	= -Wall -Wformat=0 -O2 -fomit-frame-pointer -IIDE \
-          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DIDEHD -I/usr/include/SDL2
+          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DSOUND_PSG -DIDEHD -I/usr/include/SDL2
 ASFLAGS = -Wall -c
 
 OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.o Bitmap.o HarddiskIDE.o sms_ntsc.o
@@ -50,7 +50,7 @@ Coleco.o:   Coleco.c Coleco.h Z80.h Z80IO.h
 Bitmap.o:   Bitmap.c Bitmap.h
 Z80Debug.o: Z80Debug.c Z80.h Z80IO.h z80dasm.h
 Z80.o:      Z80.c Z80.h Z80CDx86.h Z80IO.h Z80DAA.h
-SDL.o:      AdamemSDL.c AdamSDLSound.c
+SDL.o:      AdamemSDL.c AdamSDLSound_2.c
 Sound.o:    Sound.c Coleco.h Sound.h
 HarddiskIDE.o:
 	    $(CC) $(CFLAGS) -c IDE/HarddiskIDE.c

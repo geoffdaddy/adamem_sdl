@@ -26,7 +26,7 @@
 #include "sms_ntsc.h"
 
 /* Title for -help output */
-char Title[]="ADAMEm SDL 2.1f";
+char Title[]="ADAMEm SDL 2.1g";
 
 char szBitmapFile[256];           /* Next screen shot file                  */
 char szSnapshotFile[256];         /* Next snapshot file                     */
@@ -357,6 +357,7 @@ static void keyb_handler (int code,int newstatus)
 				if (!keyboardmode || AltPressed())
 					swapbuttons^=4;
 			break;
+#ifdef SOUND
 			case SCANCODE_F1:
 			 if (!keyboardmode || AltPressed())
 			  ToggleSoundChannel (0);
@@ -377,6 +378,7 @@ static void keyb_handler (int code,int newstatus)
 			 if (!keyboardmode || AltPressed())
 			  ToggleSound ();
 			 break;
+#endif
 			case SCANCODE_F8:
 				if (!keyboardmode || AltPressed())
 					makeshot=1;
@@ -391,12 +393,14 @@ static void keyb_handler (int code,int newstatus)
 				}
 #endif
 			break;
+#ifdef SOUND			
 			case SCANCODE_F11:
 			 if (!PausePressed && !AltPressed()) DecreaseSoundVolume ();
 			 break;
 			case SCANCODE_F12:
 			 if (!PausePressed && !AltPressed()) IncreaseSoundVolume ();
 			 break;
+#endif
 			case SCANCODE_F10:
 				Z80_Running=0;
 			break;
@@ -1179,7 +1183,9 @@ int InitMachine(void)
 	JoyState[0]=JoyState[1]=MouseJoyState[0]=MouseJoyState[1]=
 	JoystickJoyState[0]=JoystickJoyState[1]=0x7F7F;
 
+#ifdef SOUND
 	InitSound ();
+#endif
 //	if (expansionmode==2 || expansionmode==3 || (expansionmode!=1 && expansionmode!=4 && joystick))
 		Joy_Init ();
 
@@ -1509,14 +1515,18 @@ void Keyboard (void)
 	/* Check is PAUSE is pressed */
 	if (PausePressed)
 	{
+#ifdef SOUND		
 		StopSound ();
+#endif
 		tmp=0;
 		while (PausePressed) 
 		{
 			keyboard_update();
 			Joysticks();
 		}
+#ifdef SOUND
 		ResumeSound ();
+#endif
 		if (syncemu)
 			OldTimer=ReadTimer ();
 	}
@@ -1542,9 +1552,13 @@ void Keyboard (void)
 	if (calloptions)
 	{
 		calloptions=0;
+#ifdef SOUND
 		StopSound ();
+#endif
 		OptionsDialogue ();
+#ifdef SOUND
 		ResumeSound ();
+#endif
 		if (syncemu) OldTimer=ReadTimer();
 	}
 
