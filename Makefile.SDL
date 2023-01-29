@@ -45,7 +45,7 @@ snapedit.o: snapedit.c
 snapedit: snapedit.o
 	$(LD) -s -o snapedit snapedit.o -lz
 
-ADAMEm.o:   ADAMEm.c Coleco.h MSDOS.h Z80.h Help.h Z80IO.h
+ADAMEm.o:   ADAMEm.c Coleco.h Z80.h Help.h Z80IO.h
 Coleco.o:   Coleco.c Coleco.h Z80.h Z80IO.h
 Bitmap.o:   Bitmap.c Bitmap.h
 Z80Debug.o: Z80Debug.c Z80.h Z80IO.h z80dasm.h
