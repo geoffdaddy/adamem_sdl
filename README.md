@@ -13,6 +13,11 @@ routines since the original ADAMEm sources relied upon sampled sounds from real 
 done by others in the interim led to better understanding of how the SN76489AN chip generates sound, so I used
 information for those various sources and datasheets to come up with something that loads the sound stream directly.
 
+I have moved a lot of the original driver code under the Unsupported directory. That's not to say that you couldn't
+use these, but I think at this point the folks that care about say a build for MS-DOS using Gravis Ultrasound is 
+vanishingly small, so I don't want to spend cycles on that. Or if someone wanted to use SVGALib for Linux instead of SDL.
+If you do, knock yourself out.
+
 The SDL driver has been successfully used with Windows 10/11, Linux (Ubuntu 20.04 and greater), and Mac OS.
 
 The Linux target can be built with 'make sdl' as long as the libsdl2 libraries are installed.
