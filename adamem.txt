@@ -1,6 +1,6 @@
                           ******* ADAMEm *******
                      The Portable Coleco ADAM Emulator
-                                Version 1.9
+                                Version 2.1
                                      
                  Copyright (C) 1996-1999  Marcel de Kogel
 		 SDL Driver Copyright (C) 2006-2023  Geoff Oltmans
@@ -70,6 +70,7 @@ What's emulated
 - MicroInnovations-style IDE hard disk emulation
 - Dummy registers to "emulate" the MIDIMite interface, enough to allow SEQuel software to
   operate.
+- Super Game Module. This is disabled by default. To enable, use the -sgm switch (see below)
  
 
 Key Mappings
