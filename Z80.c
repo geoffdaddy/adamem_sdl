@@ -2442,11 +2442,11 @@ unsigned Z80_GetPC (void)
 int Z80_Execute (void)
 {
  unsigned opcode;
-//	unsigned temp = 0;
-//	int operand;
+//    unsigned temp = 0;
+//    int operand;
  Z80_Running=1;
  InitTables ();
-	
+ 
  do
  {
 #ifdef TRACE
@@ -2460,15 +2460,15 @@ int Z80_Execute (void)
 #endif
   ++R.R;
   opcode=M_RDOP(R.PC.D);
-//  operand = Z80_RDMEM(R.PC.D+1)|(Z80_RDMEM(R.PC.D+2)<<8);	 
+//  operand = Z80_RDMEM(R.PC.D+1)|(Z80_RDMEM(R.PC.D+2)<<8);
 //  if ((opcode_main[opcode] == call) && (operand == 0xfca8)) {
-//	  printf("read keyboard\n");
-//	  temp = R.PC.D + 3;
-//  }	 
+//      printf("read keyboard\n");
+//      temp = R.PC.D + 3;
+//  }
 //  if (R.PC.D == temp) {
-//	  
-//	  printf("return from read");
-//	  
+//      
+//      printf("return from read");
+//      
 //  }
   R.PC.W.l++;
   Z80_ICount-=cycles_main[opcode];

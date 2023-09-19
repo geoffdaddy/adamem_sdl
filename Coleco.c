@@ -86,9 +86,9 @@ static int  SpinnerParam[2];      /* Value to add to SpinnerRecur           */
 static int  JoyMode=0;            /* Joyst. controller mode                 */
 static int  RAMSize;              /* Size of RAM in KB                      */
 static int  ROMSize;              /* Size of ROM in KB                      */
-int  CartSize;					  /* Size of Cartridge ROM in KB		    */
-int  CartBanks;					  /* Number of banks in a bankswitched cart */
-int  CurrCartBank;				  /* The currently selected cart bank       */
+int  CartSize;                    /* Size of Cartridge ROM in KB            */
+int  CartBanks;                   /* Number of banks in a bankswitched cart */
+int  CurrCartBank;                /* The currently selected cart bank       */
 static int  PCB=65216;            /* Current PCB address                    */
 static int  UsePCB=0;             /* Set to 1 after ADAMNet has been reset  */
 static int  NMI_Line=0;           /* Set to 1 if NMI is high                */
@@ -225,18 +225,18 @@ static void SetPCBTable (unsigned oldPCB)
 unsigned Z80_RDMEM (dword a)
 {
  int i;
- int OldBank;	
+ int OldBank;
  int retval=AddrTabl[a>>8][a&0xFF];
  if (CartBanks > 1 && a>=0xFFC0 && !EmuMode)
  {
-	 OldBank = CurrCartBank;
-	 CurrCartBank = (a-0xffc0)%CartBanks;
-	 if (OldBank != CurrCartBank)
-	 {
-		 for (i = 0xC000; i<0xFFFF; i+=256) { //Update the upper bank contents
-			 AddrTabl[i>>8] = &CART[i-0xC000 + (CurrCartBank*16*1024) ];
-		 }
-	 }
+     OldBank = CurrCartBank;
+     CurrCartBank = (a-0xffc0)%CartBanks;
+     if (OldBank != CurrCartBank)
+     {
+         for (i = 0xC000; i<0xFFFF; i+=256) { //Update the upper bank contents
+             AddrTabl[i>>8] = &CART[i-0xC000 + (CurrCartBank*16*1024) ];
+         }
+     }
  }
  if (PCBTable[a]) ReadPCB (a);
  return retval;
@@ -331,7 +331,7 @@ static void Out02 (byte Val) // IDE - Number of sectors
     if (IDE_Controller)
         controllerWriteRegister(IDE_Controller, 2, Val);
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
@@ -341,7 +341,7 @@ static void Out03 (byte Val) // IDE - Sector number
     if (IDE_Controller)
         controllerWriteRegister(IDE_Controller, 3, Val);
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
@@ -351,7 +351,7 @@ static void Out04 (byte Val) // IDE - Cylinder low byte
     if (IDE_Controller)
         controllerWriteRegister(IDE_Controller, 4, Val);
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
@@ -361,7 +361,7 @@ static void Out05 (byte Val) // IDE - Cylinder high byte
     if (IDE_Controller)
         controllerWriteRegister(IDE_Controller, 5, Val);
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
@@ -371,7 +371,7 @@ static void Out06 (byte Val) // IDE - Drive / Head
     if (IDE_Controller)
         controllerWriteRegister(IDE_Controller, 6, Val);
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
@@ -381,53 +381,53 @@ static void Out07 (byte Val) // IDE - Command
     if (IDE_Controller)
         controllerWriteRegister(IDE_Controller, 7, Val);
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
 static void Out0C (byte Val)
 {
 #ifdef PRINT_IO
-	printf("write 0c: %d\n",Val);
+    printf("write 0c: %d\n",Val);
 #endif
 }
 
 static void Out0D (byte Val)
 {
 #ifdef PRINT_IO
-	printf("write 0d: %d\n",Val);
+    printf("write 0d: %d\n",Val);
 #endif
 }
 
 static void Out0E (byte Val)
 {
 #ifdef PRINT_IO
-	printf("write 0e: %d\n",Val);
+    printf("write 0e: %d\n",Val);
 #endif
-	usartModeReg[usartWMRIndex++] = Val;
-	if (usartWMRIndex > 1)
-		usartWMRIndex = 0;
+    usartModeReg[usartWMRIndex++] = Val;
+    if (usartWMRIndex > 1)
+        usartWMRIndex = 0;
 }
 
 static void Out0F (byte Val)
 {
 #ifdef PRINT_IO
-	printf("write 0f: %d\n",Val);
+    printf("write 0f: %d\n",Val);
 #endif
-	usartCmdReg = Val;
+    usartCmdReg = Val;
 }
 
 static void Out10 (byte Val)
 {
 #ifdef PRINT_IO
-	printf("Write - MIB2 Serial Port 2 - %02X\n",Val);
+    printf("Write - MIB2 Serial Port 2 - %02X\n",Val);
 #endif
 }
 
 static void Out18 (byte Val)
 {
 #ifdef PRINT_IO
-	printf("Write - MIB2 Serial Port 1 - %02X\n",Val);
+    printf("Write - MIB2 Serial Port 1 - %02X\n",Val);
 #endif
 }
 
@@ -528,29 +528,29 @@ static void Out42 (byte Val)
 static void Out44 (byte Val)
 {
 #ifdef PRINT_IO
-	printf("Write - Orphanware Serial Port 1 - %02X\n",Val);
+    printf("Write - Orphanware Serial Port 1 - %02X\n",Val);
 #endif
 }
 
 static void Out4C (byte Val)
 {
 #ifdef PRINT_IO
-	printf("Write - Orphanware Serial Port 2 - %02X\n",Val);
+    printf("Write - Orphanware Serial Port 2 - %02X\n",Val);
 #endif
 }
 
 static void Out50 (byte Val)
 {
 #ifdef SOUND_PSG
-	PSGControlReg = Val & 0x0F;
+    PSGControlReg = Val & 0x0F;
 #endif
 }
 
 static void Out51 (byte Val)
 {
 #ifdef SOUND_PSG
-	PSGReg[PSGControlReg] = Val;
-	PSG_Sound(PSGControlReg,Val);
+    PSGReg[PSGControlReg] = Val;
+    PSG_Sound(PSGControlReg,Val);
 #endif
 }
 
@@ -588,7 +588,7 @@ static void Out53 (byte Val)
 static void Out54 (byte Val)
 {
 #ifdef PRINT_IO
-	printf("Write - Orphanware Serial Port 3 - %02X\n",Val);
+    printf("Write - Orphanware Serial Port 3 - %02X\n",Val);
 #endif
 }
 
@@ -600,8 +600,8 @@ static void Out58 (byte Val) // IDE - Data low byte
         controllerWrite(IDE_Controller, HardDiskWriteData);
     }
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
-#endif	
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+#endif
 }
 
 static void Out59 (byte Val) // IDE - Data high byte
@@ -611,7 +611,7 @@ static void Out59 (byte Val) // IDE - Data high byte
         HardDiskWriteData = Val << 8;
     }
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
@@ -623,14 +623,14 @@ static void Out5A (byte Val)
 //        FixedCtlReg = Val;
     }
 #else
-	Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
+    Z80_WRMEM((Z80_GetPC()-1)&65535,Val);
 #endif
 }
 
 static void Out5C (byte Val)
 {
 #ifdef PRINT_IO
-	printf("Write - Orphanware Serial Port 4 - %02X\n",Val);
+    printf("Write - Orphanware Serial Port 4 - %02X\n",Val);
 #endif
 }
 
@@ -736,8 +736,8 @@ static void Out60 (byte Val)
     if (Verbose&4) puts (" Upper 32K:Expansion ROM");
     for (i=32768;i<65536;i+=256)
     {
-	 AddrTabl[i>>8]=&EXPROM[i-32768];
-	 WriteAddrTabl[i>>8]=&EXPROM[i-32768];
+     AddrTabl[i>>8]=&EXPROM[i-32768];
+     WriteAddrTabl[i>>8]=&EXPROM[i-32768];
     }
     break;
    case 8:
@@ -885,38 +885,38 @@ static void OutE0 (byte Val)
 typedef void (*OutPortFn) (byte Val);
 OutPortFn OutPort[256]=
 {
-	OutNo,OutNo,Out02,Out03,Out04,Out05,Out06,Out07,
-	OutNo,OutNo,OutNo,OutNo,Out0C,Out0D,Out0E,Out0F, // 15
-	Out10,Out10,Out10,Out10,OutNo,OutNo,OutNo,OutNo, // 23
-	Out18,Out18,Out18,Out18,OutNo,OutNo,OutNo,OutNo, // 31
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 39
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 47
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 55
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 63
-	OutNo,OutNo,OutNo,OutNo,Out44,Out44,Out44,Out44, // 71
-	OutNo,OutNo,OutNo,OutNo,Out4C,Out4C,Out4C,Out4C, // 79
-	OutNo,OutNo,OutNo,OutNo,Out54,Out54,Out54,Out54, // 87
-	Out58,Out59,Out5A,OutNo,Out5C,Out5C,Out5C,Out5C, // 95
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 103
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 111
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 119
-	OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 127
-	Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80, // 135
-	Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80, // 143
-	Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80, // 151
-	Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80,
-	OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
-	OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
-	OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
-	OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
-	OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
-	OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
-	OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
-	OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
-	OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,
-	OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,
-	OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,
-	OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0
+    OutNo,OutNo,Out02,Out03,Out04,Out05,Out06,Out07,
+    OutNo,OutNo,OutNo,OutNo,Out0C,Out0D,Out0E,Out0F, // 15
+    Out10,Out10,Out10,Out10,OutNo,OutNo,OutNo,OutNo, // 23
+    Out18,Out18,Out18,Out18,OutNo,OutNo,OutNo,OutNo, // 31
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 39
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 47
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 55
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 63
+    OutNo,OutNo,OutNo,OutNo,Out44,Out44,Out44,Out44, // 71
+    OutNo,OutNo,OutNo,OutNo,Out4C,Out4C,Out4C,Out4C, // 79
+    OutNo,OutNo,OutNo,OutNo,Out54,Out54,Out54,Out54, // 87
+    Out58,Out59,Out5A,OutNo,Out5C,Out5C,Out5C,Out5C, // 95
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 103
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 111
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 119
+    OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo,OutNo, // 127
+    Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80, // 135
+    Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80, // 143
+    Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80, // 151
+    Out80,Out80,Out80,Out80,Out80,Out80,Out80,Out80,
+    OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
+    OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
+    OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
+    OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,OutA0,OutA1,
+    OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
+    OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
+    OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
+    OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,OutC0,
+    OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,
+    OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,
+    OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,
+    OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0,OutE0
 };
 
 #if 1
@@ -1038,54 +1038,54 @@ static byte Inp07 (void) // IDE - Status
 static byte Inp08 (void)
 {
 #ifdef PRINT_IO
-	printf("in 08\n");
+    printf("in 08\n");
 #endif
-	return 0x80;
+    return 0x80;
 }
 
 static byte Inp09 (void)
 {
 #ifdef PRINT_IO
-	printf("in 09\n");
+    printf("in 09\n");
 #endif
-	return 0x80;
+    return 0x80;
 }
 
 static byte Inp0A (void)
 {
-	byte temp;
-	
+    byte temp;
+    
 #ifdef PRINT_IO
-	printf("in 0a\n");
+    printf("in 0a\n");
 #endif
-	temp = usartModeReg[usartRMRIndex++];
-	if (usartRMRIndex > 1)
-		usartRMRIndex = 0;
-	return temp;
+    temp = usartModeReg[usartRMRIndex++];
+    if (usartRMRIndex > 1)
+        usartRMRIndex = 0;
+    return temp;
 }
 
 static byte Inp0B (void)
 {
 #ifdef PRINT_IO
-	printf("in 0b\n");
+    printf("in 0b\n");
 #endif
-	return usartCmdReg;
+    return usartCmdReg;
 }
 
 static byte Inp10 (void)
 {
 #ifdef PRINT_IO
-	printf("Read - MIB2 Serial Port 2\n");
+    printf("Read - MIB2 Serial Port 2\n");
 #endif
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 }
 
 static byte Inp18 (void)
 {
 #ifdef PRINT_IO
-	printf("Read - MIB2 Serial Port 1\n");
+    printf("Read - MIB2 Serial Port 1\n");
 #endif
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 }
 
 static byte Inp20 (void)
@@ -1101,26 +1101,26 @@ static byte Inp40 (void)
 static byte Inp44 (void)
 {
 #ifdef PRINT_IO
-	printf("Read - Orphanware Serial Port 1\n");
+    printf("Read - Orphanware Serial Port 1\n");
 #endif
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 }
 
 static byte Inp4C (void)
 {
 #ifdef PRINT_IO
-	printf("Read - Orphanware Serial Port 2\n");
+    printf("Read - Orphanware Serial Port 2\n");
 #endif
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 }
 
 static byte Inp52 (void)
 {
 #ifdef SOUND_PSG
-	
-	return (byte)PSGReg[PSGControlReg];
+    
+    return (byte)PSGReg[PSGControlReg];
 #else
-	return 0;
+    return 0;
 #endif
 }
 
@@ -1132,9 +1132,9 @@ static byte Inp53 (void)
 static byte Inp54 (void)
 {
 #ifdef PRINT_IO
-	printf("Read - Orphanware Serial Port 3\n");
+    printf("Read - Orphanware Serial Port 3\n");
 #endif
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 }
 
 static byte Inp58 (void) // IDE - Data low byte
@@ -1146,7 +1146,7 @@ static byte Inp58 (void) // IDE - Data low byte
         return Z80_RDMEM((Z80_GetPC()-1)&65535);
     }
 #else
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 #endif
 }
 
@@ -1167,9 +1167,9 @@ static byte Inp5A (void)
 {
 #ifdef IDEHD
     if (IDE_Controller) {
-//		AltStatReg = 0x5A;
-//		printf("AltStatReg %d\n",AltStatReg);
-//		return AltStatReg;
+//        AltStatReg = 0x5A;
+//        printf("AltStatReg %d\n",AltStatReg);
+//        return AltStatReg;
         return controllerReadRegister(IDE_Controller, 7);
     } else {
         return Z80_RDMEM((Z80_GetPC()-1)&65535);
@@ -1182,19 +1182,19 @@ static byte Inp5A (void)
 static byte Inp5B (void)
 {
 #ifdef IDEHD
-	printf("DigInReg\n");
-	return DigInReg;
+    printf("DigInReg\n");
+    return DigInReg;
 #else
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 #endif
 }
 
 static byte Inp5C (void)
 {
 #ifdef PRINT_IO
-	printf("Read - Orphanware Serial Port 4\n");
+    printf("Read - Orphanware Serial Port 4\n");
 #endif
-	return Z80_RDMEM((Z80_GetPC()-1)&65535);
+    return Z80_RDMEM((Z80_GetPC()-1)&65535);
 }
 
 static byte Inp5E (void)
@@ -1277,38 +1277,38 @@ static byte InpE2 (void)
 typedef byte (*InPortFn) (void);
 InPortFn InPort[256]=
 {
-	InpNo,Inp01,Inp02,Inp03,Inp04,Inp05,Inp06,Inp07,
-	Inp08,Inp09,Inp0A,Inp0B,InpNo,InpNo,InpNo,InpNo, // 15
-	Inp10,Inp10,InpNo,Inp10,InpNo,InpNo,InpNo,InpNo, // 23
-	Inp18,Inp18,InpNo,Inp18,InpNo,InpNo,InpNo,InpNo, // 31
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 39
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 47
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 55
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 63
-	InpNo,InpNo,InpNo,InpNo,Inp44,Inp44,Inp44,Inp44, // 71
-	InpNo,InpNo,InpNo,InpNo,Inp4C,Inp4C,Inp4C,Inp4C, // 79
-	InpNo,InpNo,InpNo,Inp53,Inp54,Inp54,Inp54,Inp54, // 87
-	Inp58,Inp59,Inp5A,Inp5B,Inp5C,Inp5C,Inp5C,Inp5C, // 95
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 103
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 111
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 119
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 127
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 135
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 143
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 151
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
-	InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
-	InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
-	InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
-	InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
-	InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
-	InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2,
-	InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2,
-	InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2,
-	InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2
+    InpNo,Inp01,Inp02,Inp03,Inp04,Inp05,Inp06,Inp07,
+    Inp08,Inp09,Inp0A,Inp0B,InpNo,InpNo,InpNo,InpNo, // 15
+    Inp10,Inp10,InpNo,Inp10,InpNo,InpNo,InpNo,InpNo, // 23
+    Inp18,Inp18,InpNo,Inp18,InpNo,InpNo,InpNo,InpNo, // 31
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 39
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 47
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 55
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 63
+    InpNo,InpNo,InpNo,InpNo,Inp44,Inp44,Inp44,Inp44, // 71
+    InpNo,InpNo,InpNo,InpNo,Inp4C,Inp4C,Inp4C,Inp4C, // 79
+    InpNo,InpNo,InpNo,Inp53,Inp54,Inp54,Inp54,Inp54, // 87
+    Inp58,Inp59,Inp5A,Inp5B,Inp5C,Inp5C,Inp5C,Inp5C, // 95
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 103
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 111
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 119
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 127
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 135
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 143
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo, // 151
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
+    InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
+    InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
+    InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
+    InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,InpA0,InpA1,
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
+    InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,InpNo,
+    InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2,
+    InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2,
+    InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2,
+    InpE0,InpE0,InpE2,InpE2,InpE0,InpE0,InpE2,InpE2
 };
 
 #if 1
@@ -1990,11 +1990,11 @@ int StartColeco(void)
  }
  else
  {
-  ROMSize=8;						  /* OS-7								*/
+  ROMSize=8;                          /* OS-7                               */
   if (sgmmode )
-    RAMSize=64;                         /* Super Game Module adds 32k, we'll burn a full 64k */
+    RAMSize=64;                       /* Super Game Module adds 32k, we'll burn a full 64k */
   else
-    RAMSize=1;                          /* 1K mapped into an 8K slot          */
+    RAMSize=1;                        /* 1K mapped into an 8K slot          */
  }
  if (Verbose) printf ("Allocating %ukB ROM... ",ROMSize);
  ROMSize*=1024;
@@ -2054,24 +2054,24 @@ int StartColeco(void)
  
    if(CartSize > 1024*1024)
    {
-	   if(Verbose) printf("FAILED, Cartridge image is too big! (>1024kB)");
+       if(Verbose) printf("FAILED, Cartridge image is too big! (>1024kB)");
    } else {
-	 fseek(f, 0L, SEEK_SET);
+     fseek(f, 0L, SEEK_SET);
      j=fread(CART,1,CartSize,f);
 
-	 if (CartSize > 0x8000) // Bank Switching Cartridge 
-	 {
-		 CartBanks = CartSize/(16*1024);
-		 CurrCartBank = CartBanks-1;
-		 if (!((CART[CartSize - 0x4000]==0x55)&&(CART[CartSize - 0x3FFF]==0xAA)) &&
-			 !((CART[CartSize - 0x4000]==0xAA)&&(CART[CartSize - 0x3FFF]==0x55)))
-		 { j=1;P="WARNING: NOT A VALID CARTRIDGE"; }
-		 
-	 } else {
-		 if (!((CART[0]==0x55)&&(CART[1]==0xAA)) &&
-			 !((CART[0]==0xAA)&&(CART[1]==0x55)))
-		 { j=1;P="WARNING: NOT A VALID CARTRIDGE"; }
-	 }
+     if (CartSize > 0x8000) // Bank Switching Cartridge 
+     {
+         CartBanks = CartSize/(16*1024);
+         CurrCartBank = CartBanks-1;
+         if (!((CART[CartSize - 0x4000]==0x55)&&(CART[CartSize - 0x3FFF]==0xAA)) &&
+             !((CART[CartSize - 0x4000]==0xAA)&&(CART[CartSize - 0x3FFF]==0x55)))
+         { j=1;P="WARNING: NOT A VALID CARTRIDGE"; }
+         
+     } else {
+         if (!((CART[0]==0x55)&&(CART[1]==0xAA)) &&
+             !((CART[0]==0xAA)&&(CART[1]==0x55)))
+         { j=1;P="WARNING: NOT A VALID CARTRIDGE"; }
+     }
 
    }
    fclose(f);
@@ -2126,14 +2126,14 @@ int StartColeco(void)
    if (f)
    {
     j=fread(EXPROM,1,0x8000,f);
-	fclose(f);
+    fclose(f);
    }
    else P="NOT FOUND";
    if (Verbose) {
     if (j>1) {
-	 printf("%d bytes loaded\n",j);
+     printf("%d bytes loaded\n",j);
     } else {
-	 puts(P);
+     puts(P);
     }
    }
   }
@@ -2144,8 +2144,8 @@ int StartColeco(void)
     // initialize IDE Master
     if (IDE_Controller && HardDiskFile[0]) {
         if (controllerAssign(IDE_Controller, HardDiskFile[0], 0, Verbose)) {
-			controllerDestroy(IDE_Controller);
-			IDE_Controller = NULL;
+            controllerDestroy(IDE_Controller);
+            IDE_Controller = NULL;
         }
     }
     // initialize IDE Slave
@@ -2230,16 +2230,16 @@ int StartColeco(void)
    }
    else
    {
-	if (CartSize > 0x8000) { // Bank Switch Cartridge
-		if (i<0xC000) {
-			AddrTabl[i>>8]=&CART[CartSize-0x4000 + (i-0x8000)];
-		}
-		else {
-			AddrTabl[i>>8]=&CART[CartSize-0x4000 + (i-0xc000)];
-		}
-	} else {
-		AddrTabl[i>>8]=&CART[i-0x8000];
-	}
+    if (CartSize > 0x8000) { // Bank Switch Cartridge
+        if (i<0xC000) {
+            AddrTabl[i>>8]=&CART[CartSize-0x4000 + (i-0x8000)];
+        }
+        else {
+            AddrTabl[i>>8]=&CART[CartSize-0x4000 + (i-0xc000)];
+        }
+    } else {
+        AddrTabl[i>>8]=&CART[i-0x8000];
+    }
     WriteAddrTabl[i>>8]=DummyWriteTabl;
    }
   }

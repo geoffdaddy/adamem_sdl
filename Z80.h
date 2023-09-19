@@ -31,7 +31,7 @@
 /* #define INLINE static */
 /* For Visual C++ compiles, we don't want to use inlining */
 #ifdef WIN32
- #define INLINE	__inline
+ #define INLINE    __inline
 #else if defined (__GNUC__)
  #define INLINE inline
 #endif

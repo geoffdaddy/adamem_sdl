@@ -60,7 +60,7 @@ extern int  Support5thSprite;         /* Show only 4 sprites per row        */
 #define NR_PALETTES     4
 extern byte Palettes[NR_PALETTES][16*3];
 extern int  PalNum;                   /* Palette number                     */
-#define Coleco_Palette	Palettes[PalNum]
+#define Coleco_Palette     Palettes[PalNum]
 extern int  SaveSnapshot;             /* If 1, auto-save snapshot           */
 extern char *SnapshotName;            /* Snapshot file name                 */
 #define MAX_CHEATS      16            /* Maximum number of cheat codes      */
@@ -70,10 +70,10 @@ extern int  CheatCount;               /* Number of cheats                   */
 extern byte *AddrTabl[256];           /* Currently mapped in pages          */
 extern byte *WriteAddrTabl[256];      /* Used to write protect ROM          */
 
-extern byte *CART;					  /* Pointer to the cart rom space      */
-extern int  CartSize;				  /* Size of Cartridge ROM in KB		    */
-extern int  CartBanks;				  /* Number of banks in a bankswitched cart */
-extern int  CurrCartBank;		      /* The currently selected cart bank       */
+extern byte *CART;                    /* Pointer to the cart rom space      */
+extern int  CartSize;                 /* Size of Cartridge ROM in KB            */
+extern int  CartBanks;                /* Number of banks in a bankswitched cart */
+extern int  CurrCartBank;             /* The currently selected cart bank       */
 
 void DiskOpen(int i);
 void DiskClose(int i);
