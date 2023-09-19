@@ -1,6 +1,6 @@
 # adamem_sdl
 
-##ADAMEM SDL Port using SDL 2.0 library
+## ADAMEM SDL Port using SDL 2.0 library
 
 This is a port of Marcel de Kogel's excellent ADAMEm emulator for the Coleco ADAM computer. 
 Marcel's code was laid out with good hooks for creating new drivers for various different host hardware. 
