@@ -11,7 +11,7 @@
 #include "Coleco.h"
 #include "Sound.h"
 #include "SDL_endian.h"
-#include "AdamSDLSound.h"
+#include "AdamSDLSound_2.h"
 
 #include "AdamemSDL.h"
 
