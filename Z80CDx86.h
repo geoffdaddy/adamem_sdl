@@ -10,7 +10,7 @@
 /***     Please, notify me, if you make any changes to this file          ***/
 /****************************************************************************/
 
-#define _INLINE         extern __inline__
+#define _INLINE         extern inline
 
 #define M_POP(Rg)           \
         R.Rg.D=M_RDSTACK(R.SP.D)+(M_RDSTACK((R.SP.D+1)&65535)<<8); \

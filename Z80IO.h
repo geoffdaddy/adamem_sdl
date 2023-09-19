@@ -14,10 +14,10 @@
 #define INLINE_MEM                    /* Inline Z80_RDMEM() and Z80_WRMEM() */
 
 #if defined(__GNUC__) && !defined(PSP) && !defined(MSDOS) && !defined(__APPLE__)
- #define FASTCALL        __attribute__ ((regparm(3)))
- #ifdef INLINE_MEM
-  #define INLINE_MEM_GNU
- #endif
+ #define FASTCALL        __attribute__ ((fastcall))
+//  #ifdef INLINE_MEM
+//   #define INLINE_MEM_GNU
+//  #endif
 #else
  #define FASTCALL
 #endif
@@ -47,13 +47,13 @@ void FASTCALL Z80_Out (unsigned Port,byte Value);
  extern byte PCBTable[65536];
  void ReadPCB (dword a);
  void WritePCB (dword a);
- extern __inline__ unsigned Z80_RDMEM (dword a)
+ extern unsigned Z80_RDMEM (dword a)
  {
   int retval=AddrTabl[a>>8][a&0xFF];
   if (PCBTable[a]) ReadPCB (a);
   return retval;
  }
- extern __inline__ void Z80_WRMEM (dword a,byte v)
+ extern void Z80_WRMEM (dword a,byte v)
  {
   WriteAddrTabl[a>>8][a&0xFF]=v;
   if (PCBTable[a]) WritePCB (a);

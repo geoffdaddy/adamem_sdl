@@ -3,7 +3,7 @@
                                 Version 1.9
                                      
                  Copyright (C) 1996-1999  Marcel de Kogel
-		 SDL Driver Copyright (C) 2006-2016  Geoff Oltmans
+		 SDL Driver Copyright (C) 2006-2023  Geoff Oltmans
 
 Hardware and Software Requirements
 ==================================
