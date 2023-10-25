@@ -339,3 +339,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+#XCode
+xcuserdata
+*.xcworkspace
+build
+.DS_Store
