@@ -78,8 +78,9 @@
 	[cpuSpeed setIntValue: (Z80_IPeriod*(100*1000))/3579545];
 	[uPeriods setIntValue:UPeriod];
 	[sync selectCellWithTag:syncemu];
-    [sgmButton setIntValue:sgmmode];
-	
+    [sgmMode selectCellWithTag:sgmmode];
+    [videoFilter selectCellWithTag:ntscFilter];
+
 	
 }
 //- (IBAction)setInterruptFrequency:(id)sender {
@@ -131,11 +132,9 @@
 	fprintf(fptr,"-palette %d\n",[[palette selectedCell] tag]);
 	fprintf(fptr,"-uperiod %d\n",[uPeriods intValue]);
 	fprintf(fptr,"-sync %d\n",[[sync selectedCell] tag]);
-    if ([sgmButton intValue] != 0) {
-        fprintf(fptr,"-sgm\n");
-        sgmmode = 1;
-    }
-	
+    fprintf(fptr,"-sgm %d\n",[[sgmMode selectedCell] tag]);
+    fprintf(fptr,"-comp %d\n",[[videoFilter selectedCell] tag]);
+
 //		"verbose",
 //		"cheat","sound","joystick","swapbuttons",
 //		"expansion","overscan","volume","soundtrack",

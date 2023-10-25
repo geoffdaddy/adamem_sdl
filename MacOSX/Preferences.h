@@ -10,7 +10,8 @@
 	IBOutlet NSMatrix *sync;
 	IBOutlet NSSlider *cpuSpeed;
 	IBOutlet NSSlider *uPeriods;
-    IBOutlet NSButton *sgmButton;
+    IBOutlet NSMatrix *sgmMode;
+    IBOutlet NSMatrix *videoFilter;
 }
 
 //+ (Preferences *) sharedInstance;
