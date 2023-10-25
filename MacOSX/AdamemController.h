@@ -2,7 +2,7 @@
 //  AdamemController.h
 //  Adamem
 //
-//  Copyright 2008 Geoff Oltmans. All rights reserved.
+//  Copyright 2008-2023 Geoff Oltmans. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>

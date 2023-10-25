@@ -2,8 +2,7 @@
 //  main.m
 //  Adamem
 //
-//  Created by Jennifer and Geoffrey Oltmans on 11/4/08.
-//  Copyright __MyCompanyName__ 2008. All rights reserved.
+//  Copyright Geoff Oltmans 2008-2023. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>

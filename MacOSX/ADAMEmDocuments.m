@@ -2,8 +2,7 @@
 //  ADAMEmDocuments.m
 //  ADAMEm
 //
-//  Created by Jennifer and Geoffrey Oltmans on 11/12/08.
-//  Copyright 2008 Geoff Oltmans. All rights reserved.
+//  Copyright 2008-2023 Geoff Oltmans. All rights reserved.
 //
 
 #import "MyDocument.h"

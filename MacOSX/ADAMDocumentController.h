@@ -2,8 +2,7 @@
 //  ADAMDocumentController.h
 //  ADAMEm
 //
-//  Created by Jennifer and Geoffrey Oltmans on 11/17/08.
-//  Copyright 2008 Geoff Oltmans. All rights reserved.
+//  Copyright 2008-2023 Geoff Oltmans. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>
