@@ -32,7 +32,6 @@
 		BBC3699F0EC15C7B00A7B89B /* Coleco.c in Sources */ = {isa = PBXBuildFile; fileRef = BBC369980EC15C7B00A7B89B /* Coleco.c */; };
 		BBC369A00EC15C7B00A7B89B /* Sound.c in Sources */ = {isa = PBXBuildFile; fileRef = BBC369990EC15C7B00A7B89B /* Sound.c */; };
 		BBC369A20EC15C9000A7B89B /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = BBC369A10EC15C9000A7B89B /* SDLMain.m */; };
-		BBC36D3C2AE8DEDC00793A6D /* ADAMEmDocuments.m in Sources */ = {isa = PBXBuildFile; fileRef = BBC36D3B2AE8DEDC00793A6D /* ADAMEmDocuments.m */; };
 		BBDD1DD10F47DD5D0083F4E8 /* ImageSelectAccessory.nib in Resources */ = {isa = PBXBuildFile; fileRef = BBDD1DD00F47DD5D0083F4E8 /* ImageSelectAccessory.nib */; };
 		BBFA06741FAC337300695143 /* MyDocument.nib in Resources */ = {isa = PBXBuildFile; fileRef = BBFA06731FAC337300695143 /* MyDocument.nib */; };
 /* End PBXBuildFile section */
@@ -57,6 +56,7 @@
 		BB538CAD0F564574007ED1D3 /* Preferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Preferences.h; path = MacOSX/Preferences.h; sourceTree = "<group>"; };
 		BB538CAE0F564574007ED1D3 /* Preferences.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Preferences.m; path = MacOSX/Preferences.m; sourceTree = "<group>"; };
 		BB60080E0EC3F8BD00657470 /* ADAM.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = ADAM.icns; sourceTree = "<group>"; };
+		BB6548392AE9F99A00949E3B /* Z80Codes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Z80Codes.h; sourceTree = "<group>"; };
 		BB77A73D0F5B58B400CDD251 /* Preferences.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Preferences.nib; path = MacOSX/English.lproj/Preferences.nib; sourceTree = "<group>"; };
 		BB81541C0ED22B86004637D2 /* ADAMDocumentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ADAMDocumentController.h; path = MacOSX/ADAMDocumentController.h; sourceTree = "<group>"; };
 		BB81541D0ED22B86004637D2 /* ADAMDocumentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ADAMDocumentController.m; path = MacOSX/ADAMDocumentController.m; sourceTree = "<group>"; };
@@ -76,7 +76,6 @@
 		BBC369980EC15C7B00A7B89B /* Coleco.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Coleco.c; sourceTree = "<group>"; };
 		BBC369990EC15C7B00A7B89B /* Sound.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Sound.c; sourceTree = "<group>"; };
 		BBC369A10EC15C9000A7B89B /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDLMain.m; path = MacOSX/SDLMain.m; sourceTree = "<group>"; };
-		BBC36D3B2AE8DEDC00793A6D /* ADAMEmDocuments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ADAMEmDocuments.m; path = MacOSX/ADAMEmDocuments.m; sourceTree = "<group>"; };
 		BBCF2D1D0F62381C008222CD /* Coleco.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Coleco.h; sourceTree = "<group>"; };
 		BBCF2D1E0F623823008222CD /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
 		BBCF2D230F623A2A008222CD /* Z80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Z80.h; sourceTree = "<group>"; };
@@ -102,7 +101,6 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				BBC36D3B2AE8DEDC00793A6D /* ADAMEmDocuments.m */,
 				BB81541D0ED22B86004637D2 /* ADAMDocumentController.m */,
 				BB81541C0ED22B86004637D2 /* ADAMDocumentController.h */,
 				BB91A7B10ECBEC6000EFC27B /* MyDocument.m */,
@@ -157,6 +155,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				BB6548392AE9F99A00949E3B /* Z80Codes.h */,
 				BB2A77432AE8B4C7003C0376 /* AdamemSDL.h */,
 				BBBB9B572589B305006967A9 /* sms_ntsc.c */,
 				BBFA06721FAC333100695143 /* SDLMain.h */,
@@ -293,7 +292,6 @@
 				BBC3697E0EC1594300A7B89B /* AdamemController.m in Sources */,
 				BBC3699A0EC15C7B00A7B89B /* AdamemSDL.c in Sources */,
 				BBC3699B0EC15C7B00A7B89B /* ADAMEm.c in Sources */,
-				BBC36D3C2AE8DEDC00793A6D /* ADAMEmDocuments.m in Sources */,
 				BBC3699C0EC15C7B00A7B89B /* Bitmap.c in Sources */,
 				BBC3699E0EC15C7B00A7B89B /* Z80.c in Sources */,
 				BBC3699F0EC15C7B00A7B89B /* Coleco.c in Sources */,
@@ -381,12 +379,12 @@
 				"OTHER_CFLAGS[arch=*]" = (
 					"-DOSX",
 					"-DSDL",
-					"-DLSB_FIRST",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.Adamem;
 				PRODUCT_NAME = Adamem;
 				SDKROOT = macosx;
 				SYMROOT = "$(HOME)/adamembuild";
+				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
@@ -424,12 +422,12 @@
 				"OTHER_CFLAGS[arch=*]" = (
 					"-DOSX",
 					"-DSDL",
-					"-DLSB_FIRST",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.Adamem;
 				PRODUCT_NAME = Adamem;
 				SDKROOT = macosx;
 				SYMROOT = "$(HOME)/adamembuild";
+				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
