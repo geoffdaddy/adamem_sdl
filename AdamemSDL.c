@@ -1063,7 +1063,6 @@ int InitMachine(void)
 {
     int i;
     FILE *snapshotfile;
-    int posX = 100, posY = 100;
     //initSem = SDL_CreateSemaphore(0);
     //SDL_CreateThread(keyboard_update, "EventThread", (void*)NULL);
 
@@ -1610,7 +1609,6 @@ static int ReadTimer (void)
 
 void setFullScreen(int on)
 {
-    int i=0;
     if (on && !fullscreen) {
         SDL_SetWindowFullscreen(win,SDL_WINDOW_FULLSCREEN);
         fullscreen = 1;

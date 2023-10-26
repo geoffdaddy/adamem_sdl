@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <SDL_timer.h>
 
 #ifdef ZLIB
 #include <zlib.h>

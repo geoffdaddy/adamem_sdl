@@ -197,10 +197,10 @@ void soundData(void *userdata, Uint8 *stream, int len)
 				{
 					k = PSG_getEnvelope();
 					sample += ( ((soundstate->PSG_flipFlopState[j] && soundstate->PSG_toneEnable[j]) ||
-							    ((soundstate->PSG_noiseshiftregister & 1) == 0 ? 0 : 1) && soundstate->PSG_noiseEnable[j])) * PSG_voltable[k];
+                                 (((soundstate->PSG_noiseshiftregister & 1) == 0 ? 0 : 1) && soundstate->PSG_noiseEnable[j]))) * PSG_voltable[k];
 				} else { //use normal volume...
 					sample += (((soundstate->PSG_flipFlopState[j] && soundstate->PSG_toneEnable[j]) ||
-								((soundstate->PSG_noiseshiftregister & 1) == 0 ? 0 : 1) && soundstate->PSG_noiseEnable[j])) * PSG_voltable[soundstate->PSG_amp[j]];
+                                (((soundstate->PSG_noiseshiftregister & 1) == 0 ? 0 : 1) && soundstate->PSG_noiseEnable[j]))) * PSG_voltable[soundstate->PSG_amp[j]];
 				}
 		}
 #endif

@@ -39,6 +39,7 @@ extern int  PausePressed;
 extern int  AutoText80;           /* 1 if auto-switch to Text80 mode on     */
 
 void setFullScreen(int on);
+int WindowManagerSetPause(int pauseVal);
 
 #define NR_JOYBUTTONS    30
 
