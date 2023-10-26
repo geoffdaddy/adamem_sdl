@@ -19,10 +19,12 @@
 /* #define X86_ASM    */              /* Compile optimised GCC/x86 version  */
 #ifdef __powerpc__
  #define MSB_FIRST                    /* Compile for big-endian CPU         */
-#elif defined __i386__
+#elif defined __i386__ || defined __x86_64__
  #define LSB_FIRST                    /* Compile for low-endian CPU         */
 #endif
-/* #define __64BIT__  */              /* Compile for 64 bit machines        */
+#ifdef __x86_64
+ #define __64BIT__               /* Compile for 64 bit machines        */
+#endif
 /* #define __128BIT__ */              /* Compile for 128 bit machines       */
 
 /****************************************************************************/
@@ -33,8 +35,11 @@
 #ifdef WIN32
  #define INLINE    __inline
 #else
-#if defined (__GNUC__)
+#if defined (__GNUC__) /*|| defined(__clang__)*/
  #define INLINE inline
+#else
+#define INLINE
+
 #endif //__GNUC__
 #endif //WIN32
 
@@ -66,7 +71,7 @@ typedef union
    struct { word h7,h6,h5,h4,h3,h2,h,l; } W;
    dword D;
  #endif
-#elif __64BIT__
+#elif defined __64BIT__
  #ifdef LSB_FIRST
    struct { byte l,h,h2,h3,h4,h5,h6,h7; } B;
    struct { word l,h,h2,h3; } W;
