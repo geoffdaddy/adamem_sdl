@@ -22,9 +22,9 @@
 #elif defined __i386__ || defined __x86_64__
  #define LSB_FIRST                    /* Compile for low-endian CPU         */
 #endif
-//#ifdef __x86_64__
-// #define __64BIT__               /* Compile for 64 bit machines        */
-//#endif
+#ifdef __x86_64__
+ #define __64BIT__               /* Compile for 64 bit machines        */
+#endif
 /* #define __128BIT__ */              /* Compile for 128 bit machines       */
 
 /****************************************************************************/
@@ -34,8 +34,6 @@
 /* For Visual C++ compiles, we don't want to use inlining */
 #ifdef WIN32
  #define INLINE    __inline
-#elif defined (__GNUC__) && !defined(__clang__)
- #define INLINE inline
 #endif //WIN32
 
 #ifndef EMU_TYPES
