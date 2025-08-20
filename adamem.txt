@@ -149,7 +149,7 @@ General options:
 -eos <file>            -  Select EOS ROM image [EOS.rom]
 -wp <file>             -  Select SmartWriter ROM image [WP.rom]
 -ram <value>           -  Select number of 64K expansion RAM pages [1]
--exp <file>	       -  Select Slot 2 Expansion ROM image [EXP.rom]
+-exprom <file>	       -  Select Slot 2 Expansion ROM image [EXP.rom]
 -diska, -diskb,        -  Select disk/tape images to use [none]
 -diskc, -diskd,
 -tapea, -tapeb,
