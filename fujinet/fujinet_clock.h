@@ -1,0 +1,1 @@
+void UpdateFujiClock(int mode, int device_id, unsigned dcb);

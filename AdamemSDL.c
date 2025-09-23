@@ -9,6 +9,12 @@
 /****************************************************************************/
 
 #include "Coleco.h"
+#if defined(FUJINET)
+#include "fujinet/fujinet.h"
+#else
+#define FUJINET_VERSION ""
+#endif
+
 #include "Sound.h"
 #include "SDL_endian.h"
 #include "AdamSDLSound_2.h"
@@ -26,7 +32,7 @@
 #include "sms_ntsc.h"
 
 /* Title for -help output */
-char Title[]="ADAMEm SDL 2.1g";
+char Title[] = "ADAMEm SDL 2.1g" FUJINET_VERSION ;
 
 char szBitmapFile[256];           /* Next screen shot file                  */
 char szSnapshotFile[256];         /* Next snapshot file                     */

@@ -6,18 +6,22 @@
 # ZLIB			Compile ZLIB version
 # SDL			Use the SDL library
 # IDEHD			Include IDE disk support
+# FUJINET       Include Fujinet support
 
 CC	= $(CROSS_COMPILE)gcc	# C compiler used
 LD	= $(CROSS_COMPILE)gcc	# Linker used
 AS      = $(CROSS_COMPILE)gcc   # Assembler used
 
-CFLAGS	= -Wall -Wformat=0 -O2 -fomit-frame-pointer -IIDE \
-          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DSOUND_PSG -DIDEHD -I/usr/include/SDL2
+CFLAGS	= -Wall -Wformat=0 -O2 -fomit-frame-pointer -IIDE -Ifujinet \
+          -DLSB_FIRST -DSDL -DDEBUG -DSOUND -DSOUND_PSG -DIDEHD -DFUJINET -I/usr/include/SDL2
 ASFLAGS = -Wall -c
 
-OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.o Bitmap.o HarddiskIDE.o sms_ntsc.o
+OBJECTS = ADAMEm.o Coleco.o Z80.o AdamemSDL.o AdamSDLSound_2.o Sound.o Z80Debug.o \
+          Bitmap.o HarddiskIDE.o sms_ntsc.o \
+		  fujinet.o fujinet_appkey.o fujinet_clock.o fujinet_network.o fujinet_network_json.o fujinet_random.o \
+		  fujinet_slip.o fujinet_communications.o
 
-all:    adamem cvem keys z80dasm snapedit
+all:    keys z80dasm snapedit adamem cvem 
 
 adamem: $(OBJECTS)
 	$(LD) -s -o adamem $(OBJECTS) -lz `sdl2-config --static-libs` -lm
@@ -47,12 +51,36 @@ snapedit: snapedit.o
 
 ADAMEm.o:   ADAMEm.c Coleco.h Z80.h Help.h Z80IO.h
 Coleco.o:   Coleco.c Coleco.h Z80.h Z80IO.h
+fujinet.o:  fujinet/fujinet.c
+	    $(CC) $(CFLAGS) -c fujinet/fujinet.c
+	
+fujinet_appkey.o: fujinet/fujinet_appkey.c fujinet/fujinet_appkey.h
+	    $(CC) $(CFLAGS) -c fujinet/fujinet_appkey.c
+
+fujinet_network.o: fujinet/fujinet_network.c fujinet/fujinet_network.h
+	    $(CC) $(CFLAGS) -c fujinet/fujinet_network.c
+
+fujinet_network_json.o: fujinet/fujinet_network_json.c fujinet/fujinet_network_json.h
+	    $(CC) $(CFLAGS) -c fujinet/fujinet_network_json.c
+
+fujinet_clock.o: fujinet/fujinet_clock.c fujinet/fujinet_clock.h
+	    $(CC) $(CFLAGS) -c fujinet/fujinet_clock.c
+
+fujinet_random.o: fujinet/fujinet_random.c fujinet/fujinet_random.h
+	    $(CC) $(CFLAGS) -c fujinet/fujinet_random.c
+
+fujinet_slip.o: fujinet/fujinet_slip.c fujinet/fujinet_slip.h
+		$(CC) $(CFLAGS) -c fujinet/fujinet_slip.c
+
+fujinet_communications.o: fujinet/fujinet_communications.c fujinet/fujinet_communications.h
+	    $(CC) $(CFLAGS) -c fujinet/fujinet_communications.c
+
 Bitmap.o:   Bitmap.c Bitmap.h
 Z80Debug.o: Z80Debug.c Z80.h Z80IO.h z80dasm.h
 Z80.o:      Z80.c Z80.h Z80CDx86.h Z80IO.h Z80DAA.h
 SDL.o:      AdamemSDL.c AdamSDLSound_2.c
 Sound.o:    Sound.c Coleco.h Sound.h
-HarddiskIDE.o:
+HarddiskIDE.o: IDE/HarddiskIDE.c
 	    $(CC) $(CFLAGS) -c IDE/HarddiskIDE.c
 
 sms_ntsc.o:    sms_ntsc.c

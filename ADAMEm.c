@@ -28,6 +28,8 @@
 #ifdef SDL
 #include "AdamemSDL.h"
 #endif
+
+
 #include "Help.h"
 
 /* Program title for -help output */
@@ -161,6 +163,9 @@ static int ParseOptions (int argc,char *argv[])
                      "Copyright (C) 1996  Marcel de Kogel\n"
 #ifdef SDL
 					 "SDL Driver Copyright (C) 2006-2020 Geoff Oltmans\n"
+#endif
+#ifdef FUJINET
+                     "Fujinet Implementation Copyleft 2024 Norman Davie\n"
 #endif
 					 "Usage: %s [-option1 [-option2...]] [filename]\n"
                      "[filename] = name of the file to load as a cartridge [CART.ROM]\n"
@@ -794,7 +799,7 @@ int main (int argc,char *argv[])
 #endif
 {
  //char test;
- Verbose=1;
+ Verbose=0;
  CPUSpeed=100;
  IFreq=60;
  UPeriod=3;

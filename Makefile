@@ -21,10 +21,12 @@ default:
 sdl:
 	make -f Makefile.SDL
 
+EXT = *.o
+
 clean:
 	rm -f adamem.map
 	rm -f PARAM.SFO
-	rm -f *.o
+	for i in $(EXT); do find . -name "$$i" -delete; done
 
 #linux:
 #	make clean

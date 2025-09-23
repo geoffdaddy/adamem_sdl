@@ -1,0 +1,1 @@
+void UpdateFujiNetwork_json(int mode, int device_id, unsigned dcb);
