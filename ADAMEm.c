@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "Coleco.h"
+#include "AdamNet.h"
 #ifdef MSDOS
 #include "MSDOS.h"
 #include <sys/stat.h>
@@ -48,7 +49,8 @@ char *Options[]=
   "printertype","chipset","sprite","shm","savecpu","palette", //39..44
   "ram","snap","autosnap","diskspeed","tapespeed","lpt","tdos", //45..51
   "cart","exprom", //52..53
-  "idehda","idehdb","sgm","composite","NSDocumentRevisionsDebugMode", //54..59
+  "idehda","idehdb","sgm","composite","NSDocumentRevisionsDebugMode", //54..58
+  "fujinet", //59
   NULL
 };
 
@@ -65,6 +67,7 @@ char *AbvOptions[]=
   "ram","sn","asn","ds","ts","lpt","tdos",
   "ct","er",
   "idea","ideb","sgm","comp","NSDoc",
+  "fn", //59
   NULL
 };
 
@@ -93,6 +96,7 @@ static char ProgramPath[MAX_FILE_NAME];
 static char ProgramName[MAX_FILE_NAME];
 static int  CartNameSupplied=0;
 static int  ExpRomSupplied=0;
+static int  FujiNetPort=0;        /* TCP port for AdamNet-over-IP (0=disabled) */
 
 #ifdef WIN32
 static int  SkipCliOptions=0;
@@ -543,6 +547,14 @@ static int ParseOptions (int argc,char *argv[])
        case 58:
            N++;
            break;
+       case 59:                          /* -fujinet [port] : AdamNet over IP */
+           /* Port is optional; default to ADAMNET_DEFAULT_PORT. Only consume the
+              next argument if it looks like a port number. */
+           if (N+1 < argc && argv[N+1][0]>='0' && argv[N+1][0]<='9')
+               FujiNetPort = atoi(argv[++N]);
+           else
+               FujiNetPort = ADAMNET_DEFAULT_PORT;
+           break;
        default: printf("Wrong option '%s'\n",argv[N]);
              return 0;
    }
@@ -917,7 +929,18 @@ int main (int argc,char *argv[])
 // test = getchar();
 // }
 #endif
+ if (FujiNetPort>0)
+ {
+  AdamNet_Init (FujiNetPort);
+  /* Wait for fujinet-pc to connect before releasing the Z80, so the ADAM's
+     first boot scan already sees the FujiNet drive (otherwise it drops to
+     SmartWriter before fujinet has connected). */
+  if (!AdamNet_WaitForConnection (30000))
+   printf ("AdamNet: no fujinet-pc connected; booting anyway "
+           "(press F12 to reboot once it connects).\n");
+ }
  StartColeco();
+ if (FujiNetPort>0) AdamNet_Shutdown ();
  TrashColeco();
 #ifndef MSDOS
  TrashMachine ();
