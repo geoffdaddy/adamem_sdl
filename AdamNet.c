@@ -46,9 +46,9 @@
 
 /* Timeouts (ms). Generous; localhost transactions complete in microseconds. */
 #define TMO_ACK         300
-#define TMO_DATA       1500
+#define TMO_DATA       8000
 #define TMO_RECV_POLL     5    /* per RECEIVE re-poll while device seeks       */
-#define TMO_RECV_TOTAL  800    /* total budget waiting out a block seek        */
+#define TMO_RECV_TOTAL 8000    /* total budget waiting out a block seek (TNFS) */
 
 extern int Verbose;            /* from Coleco.c                               */
 
@@ -252,6 +252,27 @@ static int an_recv_byte (int timeout_ms)
  return b;
 }
 
+/* Discard any bytes already waiting in the socket. A slow (e.g. TNFS-backed)
+   block read makes the device seek-stall while we re-poll CONTROL.RECEIVE; when
+   it finally completes it can ACK several of those buffered re-polls, leaving
+   duplicate ACKs queued. Dropping them keeps the data packet from being
+   mis-read. Non-blocking; only ever sees bytes the device already sent. */
+static void an_drain (void)
+{
+ unsigned char scratch[64];
+ fd_set rfds;
+ struct timeval tv;
+ if (an_conn_fd<0) return;
+ for (;;)
+ {
+  FD_ZERO (&rfds);
+  FD_SET (an_conn_fd,&rfds);
+  tv.tv_sec=0; tv.tv_usec=0;            /* poll, never block                   */
+  if (select (an_conn_fd+1,&rfds,NULL,NULL,&tv)<=0) break;
+  if (recv (an_conn_fd,scratch,sizeof scratch,0)<=0) break;
+ }
+}
+
 static unsigned char an_checksum (const unsigned char *buf,int len)
 {
  unsigned char ck=0;
@@ -330,11 +351,17 @@ int AdamNet_ReadBlock (int dev,unsigned long block,unsigned char *buf)
   return -1;                            /* unexpected byte                     */
  }
 
+ /* A slow seek makes the device ACK several of our buffered RECEIVE re-polls;
+    drop the surplus ACKs before asking for data so the packet header lines up. */
+ an_drain ();
+
  /* 3. CONTROL.CLR (CTS): device streams the data packet
-       [0xB0|dev], length(BE16=1024), <1024 bytes>, checksum. */
+       [0xB0|dev], length(BE16=1024), <1024 bytes>, checksum. Tolerate any stray
+       ACK byte that slips in just ahead of the header. */
  if (an_send_byte (CMD(MN_CLR,dev))) return -1;
- if (an_recv (hdr,3,TMO_DATA)) return -1;
+ do { if (an_recv (hdr,1,TMO_DATA)) return -1; } while (hdr[0]==RESP(NR_ACK,dev));
  if (hdr[0]!=RESP(NR_SEND,dev)) return -1;
+ if (an_recv (hdr+1,2,TMO_DATA)) return -1;
  len=(hdr[1]<<8)|hdr[2];                 /* big-endian length                  */
  if (len!=ADAMNET_BLOCK_SIZE) return -1;
  if (an_recv (buf,ADAMNET_BLOCK_SIZE,TMO_DATA)) return -1;
