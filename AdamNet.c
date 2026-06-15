@@ -373,7 +373,7 @@ int AdamNet_ReadBlock (int dev,unsigned long block,unsigned char *buf)
 /* --- Non-blocking block read (keeps the Z80 running during a slow seek) --- */
 
 static struct timeval an_rb_t0;     /* read start (overall timeout)            */
-static struct timeval an_rb_last;   /* last RECEIVE re-poll send               */
+static struct timeval an_rb_poll;   /* last time we actually touched the socket */
 
 int AdamNet_ReadBlockBegin (int dev,unsigned long block)
 {
@@ -382,7 +382,7 @@ int AdamNet_ReadBlockBegin (int dev,unsigned long block)
  if (an_send_block_num (dev,block)) return -1;
  if (an_send_byte (CMD(MN_RECEIVE,dev))) return -1;
  gettimeofday (&an_rb_t0,NULL);
- an_rb_last=an_rb_t0;
+ an_rb_poll=an_rb_t0;
  return 0;
 }
 
@@ -390,11 +390,24 @@ int AdamNet_ReadBlockReady (int dev,unsigned char *buf)
 {
  unsigned char hdr[3];
  struct timeval now;
+ long us;
  int r,len;
 
  if (an_conn_fd<0) return -1;
 
- r=an_recv_byte (0);                        /* non-blocking peek for the ACK     */
+ /* EOS spins reading the DCB status byte, calling us thousands of times per
+    frame. Only actually touch the socket ~once per ms: a select()/recv() on
+    every call is a syscall storm that overruns the frame and makes the music
+    tempo uneven. gettimeofday is a cheap vDSO read, so gating on it is fine. */
+ gettimeofday (&now,NULL);
+ us=(now.tv_sec-an_rb_poll.tv_sec)*1000000L+(now.tv_usec-an_rb_poll.tv_usec);
+ if (us<1000) return 0;                      /* throttle -> report pending        */
+ an_rb_poll=now;
+
+ if ((now.tv_sec-an_rb_t0.tv_sec)*1000+(now.tv_usec-an_rb_t0.tv_usec)/1000 > TMO_RECV_TOTAL)
+  return -1;
+
+ r=an_recv_byte (0);                         /* non-blocking peek for the ACK     */
  if (r==RESP(NR_ACK,dev))
  {
   an_drain ();                              /* drop duplicate seek-poll ACKs     */
@@ -411,16 +424,7 @@ int AdamNet_ReadBlockReady (int dev,unsigned char *buf)
  if (r==RESP(NR_NACK,dev)) return -1;
  if (r>=0) return -1;                       /* unexpected byte                   */
 
- /* Still seeking. Honour the overall budget, and re-poll RECEIVE at most every
-    couple of ms (the EOS status loop calls us far more often than that). */
- gettimeofday (&now,NULL);
- if ((now.tv_sec-an_rb_t0.tv_sec)*1000+(now.tv_usec-an_rb_t0.tv_usec)/1000 > TMO_RECV_TOTAL)
-  return -1;
- if ((now.tv_sec-an_rb_last.tv_sec)*1000+(now.tv_usec-an_rb_last.tv_usec)/1000 >= 2)
- {
-  if (an_send_byte (CMD(MN_RECEIVE,dev))) return -1;
-  an_rb_last=now;
- }
+ if (an_send_byte (CMD(MN_RECEIVE,dev))) return -1;   /* still seeking: re-poll   */
  return 0;                                  /* pending                           */
 }
 
