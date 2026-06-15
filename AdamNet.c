@@ -370,6 +370,60 @@ int AdamNet_ReadBlock (int dev,unsigned long block,unsigned char *buf)
  return 0;
 }
 
+/* --- Non-blocking block read (keeps the Z80 running during a slow seek) --- */
+
+static struct timeval an_rb_t0;     /* read start (overall timeout)            */
+static struct timeval an_rb_last;   /* last RECEIVE re-poll send               */
+
+int AdamNet_ReadBlockBegin (int dev,unsigned long block)
+{
+ if (an_conn_fd<0) return -1;
+ an_drain ();                               /* resync from any prior transaction */
+ if (an_send_block_num (dev,block)) return -1;
+ if (an_send_byte (CMD(MN_RECEIVE,dev))) return -1;
+ gettimeofday (&an_rb_t0,NULL);
+ an_rb_last=an_rb_t0;
+ return 0;
+}
+
+int AdamNet_ReadBlockReady (int dev,unsigned char *buf)
+{
+ unsigned char hdr[3];
+ struct timeval now;
+ int r,len;
+
+ if (an_conn_fd<0) return -1;
+
+ r=an_recv_byte (0);                        /* non-blocking peek for the ACK     */
+ if (r==RESP(NR_ACK,dev))
+ {
+  an_drain ();                              /* drop duplicate seek-poll ACKs     */
+  if (an_send_byte (CMD(MN_CLR,dev))) return -1;
+  do { if (an_recv (hdr,1,TMO_DATA)) return -1; } while (hdr[0]==RESP(NR_ACK,dev));
+  if (hdr[0]!=RESP(NR_SEND,dev)) return -1;
+  if (an_recv (hdr+1,2,TMO_DATA)) return -1;
+  len=(hdr[1]<<8)|hdr[2];
+  if (len!=ADAMNET_BLOCK_SIZE) return -1;
+  if (an_recv (buf,ADAMNET_BLOCK_SIZE,TMO_DATA)) return -1;
+  if (an_recv_byte (TMO_DATA)<0) return -1;
+  return 1;                                 /* done                              */
+ }
+ if (r==RESP(NR_NACK,dev)) return -1;
+ if (r>=0) return -1;                       /* unexpected byte                   */
+
+ /* Still seeking. Honour the overall budget, and re-poll RECEIVE at most every
+    couple of ms (the EOS status loop calls us far more often than that). */
+ gettimeofday (&now,NULL);
+ if ((now.tv_sec-an_rb_t0.tv_sec)*1000+(now.tv_usec-an_rb_t0.tv_usec)/1000 > TMO_RECV_TOTAL)
+  return -1;
+ if ((now.tv_sec-an_rb_last.tv_sec)*1000+(now.tv_usec-an_rb_last.tv_usec)/1000 >= 2)
+ {
+  if (an_send_byte (CMD(MN_RECEIVE,dev))) return -1;
+  an_rb_last=now;
+ }
+ return 0;                                  /* pending                           */
+}
+
 int AdamNet_WriteBlock (int dev,unsigned long block,const unsigned char *buf)
 {
  if (an_conn_fd<0) return -1;

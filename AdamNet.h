@@ -47,6 +47,16 @@ int  AdamNet_DiskStatus (int dev, unsigned char *status_byte);
 /* Read a 1024-byte block from a block device into buf. */
 int  AdamNet_ReadBlock (int dev, unsigned long block, unsigned char *buf /* 1024 */);
 
+/* Non-blocking block read so the Z80 (and thus audio/VDP IRQs) keeps running
+   while a slow (TNFS) read completes, instead of freezing the emulator.
+   Begin kicks off the read; Ready is polled until it returns non-zero:
+     1  = done, buf filled
+     0  = still seeking (call again later)
+    -1  = error/timeout
+   Only one read may be in flight at a time. */
+int  AdamNet_ReadBlockBegin (int dev, unsigned long block);
+int  AdamNet_ReadBlockReady (int dev, unsigned char *buf /* 1024 */);
+
 /* Write a 1024-byte block to a block device. */
 int  AdamNet_WriteBlock (int dev, unsigned long block, const unsigned char *buf /* 1024 */);
 

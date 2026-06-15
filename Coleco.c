@@ -2861,12 +2861,37 @@ static void UpdateTape (int mode,int nr,unsigned DCB)
 /*** ADAMEm acts as the AdamNet master: it runs the wire transaction and   ***/
 /*** writes the result back into the DCB / target buffer in RAM.           ***/
 /****************************************************************************/
+/* In-flight async block read (see AdamNet_ReadBlockBegin). EOS polls the DCB
+   status byte while it completes, so the Z80 keeps running and audio / VDP
+   interrupts are not frozen by a slow (e.g. TNFS) disk read. */
+static int      g_fn_async = 0;
+static int      g_fn_dev, g_fn_dcb;
+static unsigned g_fn_addr, g_fn_count;
+
 static void UpdateFujiNet (int mode,int dev_id,unsigned DCB)
 {
  int dev=dev_id&0x0F;
  unsigned addr,count,i;
  unsigned long block;
  unsigned char buf[1024],st;
+
+ /* Service an in-flight async block read on every DCB access (the EOS status
+    poll drives this). When it finishes, drop the data + status into the DCB. */
+ if (g_fn_async)
+ {
+  int rr=AdamNet_ReadBlockReady (g_fn_dev,buf);
+  if (rr!=0)
+  {
+   if (rr>0)
+   {
+    unsigned k;
+    for (k=0;k<g_fn_count;++k) RAM[(g_fn_addr+k)&0xFFFF]=buf[k];
+    RAM[g_fn_dcb]=0x80;
+   }
+   else { RAM[(g_fn_dcb+20)&0xFFFF]|=6; RAM[g_fn_dcb]=0x9B; }
+   g_fn_async=0;
+  }
+ }
 
  /* mode 0 is the Z80 reading the DCB status byte: the result of the last
     command already sits in RAM[DCB], so just leave it. */
@@ -2907,10 +2932,13 @@ static void UpdateFujiNet (int mode,int dev_id,unsigned DCB)
     if (count>1024) count=1024;
     if (RAM[DCB]==4)                    /* read                               */
     {
-     if (AdamNet_ReadBlock (dev,block,buf)==0)
+     /* Kick off the read and return immediately, leaving the DCB "busy" (bit 7
+        clear). EOS polls the status, finalized above, so the Z80 isn't frozen
+        for the whole seek. (One read in flight at a time; EOS is sequential.) */
+     if (AdamNet_ReadBlockBegin (dev,block)==0)
      {
-      for (i=0;i<count;++i) RAM[(addr+i)&0xFFFF]=buf[i];
-      RAM[DCB]=0x80;
+      g_fn_async=1; g_fn_dev=dev; g_fn_dcb=DCB; g_fn_addr=addr; g_fn_count=count;
+      RAM[DCB]=0x00;                    /* in progress                         */
      }
      else { RAM[(DCB+20)&0xFFFF]|=6; RAM[DCB]=0x9B; }
     }
