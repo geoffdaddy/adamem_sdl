@@ -48,7 +48,11 @@
 #define TMO_ACK         300
 #define TMO_DATA       8000
 #define TMO_RECV_POLL     5    /* per RECEIVE re-poll while device seeks       */
-#define TMO_RECV_TOTAL 8000    /* total budget waiting out a block seek (TNFS) */
+/* Total budget to wait out a block seek. FujiNet may retry a lossy TNFS read
+   up to ~8 x 2000ms, so wait longer than that before giving up -- otherwise the
+   master times out mid-read, the ADAM retries, and a big .ddp boot over a laggy
+   link crawls (or stalls) instead of just riding the loss out. */
+#define TMO_RECV_TOTAL 20000
 
 extern int Verbose;            /* from Coleco.c                               */
 
