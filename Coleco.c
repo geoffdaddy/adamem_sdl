@@ -2913,7 +2913,9 @@ static void UpdateFujiNet (int mode,int dev_id,unsigned DCB)
      RAM[DCB]=0x80;
      RAM[(DCB+17)&0xFFFF]=0x00;         /* block size = 1024                  */
      RAM[(DCB+18)&0xFFFF]=0x04;
-     RAM[(DCB+20)&0xFFFF]&=0xF0;        /* media present                      */
+     /* Reflect FujiNet's media-status nibble (0x03 = no media) so an empty
+        forwarded drive drops to SmartWriter instead of hanging on block 0. */
+     RAM[(DCB+20)&0xFFFF]=(RAM[(DCB+20)&0xFFFF]&0xF0)|(st&0x0F);
     }
     else RAM[DCB]=0x9B;
     break;
