@@ -10,6 +10,7 @@
 /****************************************************************************/
 
 #include "Coleco.h"
+#include "AdamNet.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -30,8 +31,8 @@
 #include <zlib.h>
 #endif
 
-/* #define PRINT_IO  */           /* Print accesses to unused I/O ports     */
-/* #define PRINT_MEM */           /* Print writes to ROM                    */
+#define PRINT_IO            /* Print accesses to unused I/O ports     */
+#define PRINT_MEM           /* Print writes to ROM                    */
 
 VDP_t VDP;                        /* VDP parameters                         */
 int  Z80_IRQ=Z80_IGNORE_INT;      /* Z80 IRQ line status                    */
@@ -2855,11 +2856,155 @@ static void UpdateTape (int mode,int nr,unsigned DCB)
 /****************************************************************************/
 /*** This function is called when a DCB is read from or written to        ***/
 /****************************************************************************/
+/****************************************************************************/
+/*** Forward a DCB operation to a FujiNet AdamNet device over the socket.  ***/
+/*** ADAMEm acts as the AdamNet master: it runs the wire transaction and   ***/
+/*** writes the result back into the DCB / target buffer in RAM.           ***/
+/****************************************************************************/
+/* In-flight async block read (see AdamNet_ReadBlockBegin). EOS polls the DCB
+   status byte while it completes, so the Z80 keeps running and audio / VDP
+   interrupts are not frozen by a slow (e.g. TNFS) disk read. */
+static int      g_fn_async = 0;
+static int      g_fn_dev, g_fn_dcb;
+static unsigned g_fn_addr, g_fn_count;
+
+static void UpdateFujiNet (int mode,int dev_id,unsigned DCB)
+{
+ int dev=dev_id&0x0F;
+ unsigned addr,count,i;
+ unsigned long block;
+ unsigned char buf[1024],st;
+
+ /* Service an in-flight async block read on every DCB access (the EOS status
+    poll drives this). When it finishes, drop the data + status into the DCB. */
+ if (g_fn_async)
+ {
+  int rr=AdamNet_ReadBlockReady (g_fn_dev,buf);
+  if (rr!=0)
+  {
+   if (rr>0)
+   {
+    unsigned k;
+    for (k=0;k<g_fn_count;++k) RAM[(g_fn_addr+k)&0xFFFF]=buf[k];
+    RAM[g_fn_dcb]=0x80;
+   }
+   else { RAM[(g_fn_dcb+20)&0xFFFF]|=6; RAM[g_fn_dcb]=0x9B; }
+   g_fn_async=0;
+  }
+ }
+
+ /* mode 0 is the Z80 reading the DCB status byte: the result of the last
+    command already sits in RAM[DCB], so just leave it. */
+ if (!(mode&127)) return;
+
+ if (Verbose&8)
+  fprintf (stderr,"[FujiNet] dev=0x%02X op=%u DCB=%04X\n",dev_id,RAM[DCB],DCB);
+
+ if (dev_id>=4 && dev_id<=7)            /* block device (disk drive)          */
+ {
+  switch (RAM[DCB])
+  {
+   case 0:                              /* clear DCB                          */
+    RAM[DCB]=0x80;
+    break;
+   case 1:                              /* request status                     */
+    if (AdamNet_DiskStatus (dev,&st)==0)
+    {
+     RAM[DCB]=0x80;
+     RAM[(DCB+17)&0xFFFF]=0x00;         /* block size = 1024                  */
+     RAM[(DCB+18)&0xFFFF]=0x04;
+     /* Reflect FujiNet's media-status nibble (0x03 = no media) so an empty
+        forwarded drive drops to SmartWriter instead of hanging on block 0. */
+     RAM[(DCB+20)&0xFFFF]=(RAM[(DCB+20)&0xFFFF]&0xF0)|(st&0x0F);
+    }
+    else RAM[DCB]=0x9B;
+    break;
+   case 2:                              /* soft reset                         */
+    AdamNet_ResetDevice (dev);
+    RAM[DCB]=0x80;
+    break;
+   case 3:                              /* write block                        */
+   case 4:                              /* read block                         */
+    addr =RAM[(DCB+1)&0xFFFF]+RAM[(DCB+2)&0xFFFF]*256;
+    count=RAM[(DCB+3)&0xFFFF]+RAM[(DCB+4)&0xFFFF]*256;
+    block=(unsigned long)RAM[(DCB+5)&0xFFFF]
+         +((unsigned long)RAM[(DCB+6)&0xFFFF]<<8)
+         +((unsigned long)RAM[(DCB+7)&0xFFFF]<<16)
+         +((unsigned long)RAM[(DCB+8)&0xFFFF]<<24);
+    if (count>1024) count=1024;
+    if (RAM[DCB]==4)                    /* read                               */
+    {
+     /* Kick off the read and return immediately, leaving the DCB "busy" (bit 7
+        clear). EOS polls the status, finalized above, so the Z80 isn't frozen
+        for the whole seek. (One read in flight at a time; EOS is sequential.) */
+     if (AdamNet_ReadBlockBegin (dev,block)==0)
+     {
+      g_fn_async=1; g_fn_dev=dev; g_fn_dcb=DCB; g_fn_addr=addr; g_fn_count=count;
+      RAM[DCB]=0x00;                    /* in progress                         */
+     }
+     else { RAM[(DCB+20)&0xFFFF]|=6; RAM[DCB]=0x9B; }
+    }
+    else                               /* write                              */
+    {
+     memset (buf,0,sizeof(buf));
+     for (i=0;i<count;++i) buf[i]=RAM[(addr+i)&0xFFFF];
+     if (AdamNet_WriteBlock (dev,block,buf)==0) RAM[DCB]=0x80;
+     else { RAM[(DCB+20)&0xFFFF]|=6; RAM[DCB]=0x9B; }
+    }
+    break;
+   default:
+    RAM[DCB]=0x9B;
+  }
+ }
+ else                                  /* char device (printer/network/Fuji) */
+ {
+  /* EXPERIMENTAL char path; see AdamNet.h. */
+  switch (RAM[DCB])
+  {
+   case 1:                              /* status                             */
+    if (AdamNet_CharStatus (dev,&st,NULL)==0) RAM[DCB]=0x80;
+    else RAM[DCB]=0x9B;
+    break;
+   case 3:                              /* write                              */
+    addr =RAM[(DCB+1)&0xFFFF]+RAM[(DCB+2)&0xFFFF]*256;
+    count=RAM[(DCB+3)&0xFFFF]+RAM[(DCB+4)&0xFFFF]*256;
+    if (count>1024) count=1024;
+    for (i=0;i<count;++i) buf[i]=RAM[(addr+i)&0xFFFF];
+    RAM[DCB]=(AdamNet_CharWrite (dev,buf,count)==0)?0x80:0x9B;
+    break;
+   case 4:                              /* read                               */
+    {
+     int got=0;
+     addr =RAM[(DCB+1)&0xFFFF]+RAM[(DCB+2)&0xFFFF]*256;
+     count=RAM[(DCB+3)&0xFFFF]+RAM[(DCB+4)&0xFFFF]*256;
+     if (count>1024) count=1024;
+     if (AdamNet_CharRead (dev,buf,count,&got)==0)
+     {
+      for (i=0;i<(unsigned)got;++i) RAM[(addr+i)&0xFFFF]=buf[i];
+      RAM[DCB]=0x80;
+     }
+     else RAM[DCB]=0x9B;
+    }
+    break;
+   default:
+    RAM[DCB]=0x80;
+  }
+ }
+
+ if (Verbose&8)
+  fprintf (stderr,"[FujiNet] dev=0x%02X -> result=0x%02X\n",dev_id,RAM[DCB]);
+}
+
 static void UpdateDCB (int mode,unsigned DCB)
 {
  int dev_id;
 /* if (mode && (RAM[DCB]>=0x80 || RAM[DCB]==0)) return; */
  dev_id=(RAM[(DCB+9)&0xFFFF]<<4)+(RAM[(DCB+16)&0xFFFF]&0x0F);
+ if (AdamNet_IsForwarded (dev_id) && AdamNet_Connected ())
+ {
+  UpdateFujiNet (mode,dev_id,DCB);
+  return;
+ }
  switch (dev_id)
  {
   case 1:
