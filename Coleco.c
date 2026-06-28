@@ -2343,10 +2343,16 @@ void TrashColeco(void)
    else puts ("OK");
   }
  }
- if (RAM) free (RAM);
- if (ROM) free (ROM);
- if (CART) free (CART);
- if (VDP.VRAM) free (VDP.VRAM);
+ /* NULL each pointer after freeing so TrashColeco is idempotent and a fresh
+    StartColeco (same process, e.g. the Android host keeps libadamcore resident
+    across emulator sessions) reallocates instead of reusing a dangling pointer.
+    CART is the critical case: StartColeco only mallocs it when (!CART), so a
+    stale non-NULL CART here would be reused and then double-freed -> the
+    "hardened_malloc: fatal allocator error: invalid free" crash. */
+ if (RAM) { free (RAM); RAM=0; }
+ if (ROM) { free (ROM); ROM=0; }
+ if (CART) { free (CART); CART=0; }
+ if (VDP.VRAM) { free (VDP.VRAM); VDP.VRAM=0; }
  for (i=0;i<4;++i)
  {
   DiskClose (i);
