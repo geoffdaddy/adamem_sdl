@@ -3255,6 +3255,10 @@ static int VDP_Interrupt(void)
  int dorefresh,i;
  /* Increase interrupt count */
  ++numVDPInts;
+#ifdef ADAM_SOUND_QUEUE
+ /* Advance the timestamped sound-command queue's per-frame sample clock. */
+ AdamSoundFrameTick ();
+#endif
  /* Update sound log file */
  if (SoundStream) UpdateSoundStream();
  /* Check for keyboard events */

@@ -12,6 +12,43 @@
 #include "Z80.h"
 #include "Coleco.h"
 
+#ifdef ADAM_SOUND_QUEUE
+/* Timestamped sound-register command queue. The emulator thread (single
+   producer) stamps each register write with a target on the audio sample
+   clock and pushes it onto a lock-free ring; the audio thread (single
+   consumer) applies it when it renders that sample. This keeps change spacing
+   tied to the steady audio hardware clock instead of the Android host's
+   vsync-paced VDP interrupt (which jitters and can drop frames). */
+#include <stdint.h>
+#include <stdatomic.h>
+
+typedef struct {
+	int64_t  target;   /* apply once the render sample-clock reaches this    */
+	uint8_t  psg;      /* 0 = SN76489 register, 1 = AY-3-8910 (PSG) register */
+	uint8_t  reg;
+	uint16_t val;
+} SoundCmd;
+
+#define SOUND_CMD_QUEUE_LOG2 11u
+#define SOUND_CMD_QUEUE_SIZE (1u << SOUND_CMD_QUEUE_LOG2)
+#define SOUND_CMD_QUEUE_MASK (SOUND_CMD_QUEUE_SIZE - 1u)
+
+/* Samples of lead = added audio latency, but must stay above one render block
+   (AudioOutput BLOCK_FRAMES = 1024) so the consumer can't outrun the producer
+   in a single callback. 2 frames (~1470 @60Hz) clears it; don't drop below 2. */
+#define SOUND_QUEUE_LEAD_FRAMES 2
+
+static SoundCmd              s_cmd_queue[SOUND_CMD_QUEUE_SIZE];
+static _Atomic unsigned      s_cmd_head;          /* consumer (audio thread) */
+static _Atomic unsigned      s_cmd_tail;          /* producer (emu thread)   */
+static _Atomic int_least64_t s_play_samp;         /* samples rendered so far */
+static int64_t               s_emu_samp;          /* emu thread's sample clk */
+static int                   s_clock_primed;      /* emu thread only         */
+
+static void ApplySoundReg (int r,int v);
+static void ApplyPSGSoundReg (int r,int v);
+#endif /* ADAM_SOUND_QUEUE */
+
 
 //#define MAXINT			2^10-1
 #define MAXINT			0x3ff
@@ -171,9 +208,27 @@ void soundData(void *userdata, Uint8 *stream, int len)
 	Sint16 sample = 0;
 
 	Sint16 *buffer = (Sint16 *)stream;
+#ifdef ADAM_SOUND_QUEUE
+	int64_t  play = atomic_load_explicit (&s_play_samp,memory_order_relaxed);
+	unsigned head = atomic_load_explicit (&s_cmd_head,memory_order_relaxed);
+#endif
 
 	for (i = 0; i < len/sizeof(Sint16) ; i++)
 	{
+#ifdef ADAM_SOUND_QUEUE
+		/* Apply writes scheduled at or before this sample. */
+		{
+			unsigned tail = atomic_load_explicit (&s_cmd_tail,memory_order_acquire);
+			while (head != tail && s_cmd_queue[head].target <= play)
+			{
+				if (s_cmd_queue[head].psg)
+					ApplyPSGSoundReg (s_cmd_queue[head].reg,s_cmd_queue[head].val);
+				else
+					ApplySoundReg (s_cmd_queue[head].reg,s_cmd_queue[head].val);
+				head = (head + 1u) & SOUND_CMD_QUEUE_MASK;
+			}
+		}
+#endif
 		clockSound();
 		sample = 0;
         for ( j = 0; j < 4; j++)
@@ -206,10 +261,14 @@ void soundData(void *userdata, Uint8 *stream, int len)
 #endif
 		
 		*buffer++ = sample;
-
+#ifdef ADAM_SOUND_QUEUE
+		play++;
+#endif
 	}
-
-
+#ifdef ADAM_SOUND_QUEUE
+	atomic_store_explicit (&s_cmd_head,head,memory_order_release);
+	atomic_store_explicit (&s_play_samp,play,memory_order_relaxed);
+#endif
 }
 
 static void WriteVolume (int channel,int volume)
@@ -325,6 +384,10 @@ static int Init (void)
 	SDL_AudioSpec *obtained;
 	SDL_AudioDeviceID dev;
 
+#ifdef ADAM_SOUND_QUEUE
+	/* Re-anchor the queue clock to live playback on the next frame tick. */
+	s_clock_primed = 0;
+#endif
 
 	if (initialised)
 		return 1;
@@ -503,7 +566,7 @@ static void NoiseControl (word v)
 	soundState.noiseshiftregister = 0x4000;
 }
 
-static void WriteSoundReg (int r,int v)
+static void ApplySoundReg (int r,int v)
 {
 	switch (r)
 	{
@@ -533,7 +596,7 @@ static void WriteSoundReg (int r,int v)
 	}
 }
 
-static void PSGWriteSoundReg (int r,int v)
+static void ApplyPSGSoundReg (int r,int v)
 {
 	switch (r)
 	{
@@ -580,6 +643,69 @@ static void PSGWriteSoundReg (int r,int v)
 			PSGEnvelopeShapeControl (v);
 			break;
 	}
+}
+
+#ifdef ADAM_SOUND_QUEUE
+/* Emu thread: stamp the write with the emu sample clock and push it. On a full
+   ring (audio stalled) apply immediately so a write is never dropped. */
+static void enqueueSoundCmd (int psg,int r,int v)
+{
+	unsigned tail = atomic_load_explicit (&s_cmd_tail,memory_order_relaxed);
+	unsigned next = (tail + 1u) & SOUND_CMD_QUEUE_MASK;
+	if (next == atomic_load_explicit (&s_cmd_head,memory_order_acquire))
+	{
+		if (psg) ApplyPSGSoundReg (r,v);
+		else     ApplySoundReg (r,v);
+		return;
+	}
+	s_cmd_queue[tail].target = s_emu_samp;
+	s_cmd_queue[tail].psg    = (uint8_t)psg;
+	s_cmd_queue[tail].reg    = (uint8_t)r;
+	s_cmd_queue[tail].val    = (uint16_t)v;
+	atomic_store_explicit (&s_cmd_tail,next,memory_order_release);
+}
+
+/* Emu thread, once per emulated frame (from the VDP interrupt): advance the emu
+   sample clock by one frame of samples (a steady step, no vsync jitter), and
+   re-anchor to live playback only on large drift (startup, pause, over/under). */
+void AdamSoundFrameTick (void)
+{
+	int64_t play = atomic_load_explicit (&s_play_samp,memory_order_relaxed);
+	int64_t spf  = 44100 / (IFreq ? IFreq : 60);
+	int64_t lead;
+	if (spf < 1) spf = 1;
+
+	s_emu_samp += spf;
+	lead = s_emu_samp - play;
+
+	if (!s_clock_primed ||
+	    lead < spf ||
+	    lead > (int64_t)(SOUND_QUEUE_LEAD_FRAMES + 2) * spf)
+	{
+		s_emu_samp = play + (int64_t)SOUND_QUEUE_LEAD_FRAMES * spf;
+		s_clock_primed = 1;
+	}
+}
+#endif /* ADAM_SOUND_QUEUE */
+
+/* Driver entry points: enqueue when the queue is on (applied on the audio
+   thread in soundData), else apply directly as before. */
+static void WriteSoundReg (int r,int v)
+{
+#ifdef ADAM_SOUND_QUEUE
+	enqueueSoundCmd (0,r,v);
+#else
+	ApplySoundReg (r,v);
+#endif
+}
+
+static void PSGWriteSoundReg (int r,int v)
+{
+#ifdef ADAM_SOUND_QUEUE
+	enqueueSoundCmd (1,r,v);
+#else
+	ApplyPSGSoundReg (r,v);
+#endif
 }
 
 static void SetMasterVolume (int newvolume)
