@@ -262,12 +262,13 @@ void soundData(void *userdata, Uint8 *stream, int len)
 		
 		*buffer++ = sample;
 #ifdef ADAM_SOUND_QUEUE
-		play++;
+		/* Publish the play clock every sample so the emu thread's frame tick
+		   reads a fresh position (not one stale by up to a callback). */
+		atomic_store_explicit (&s_play_samp,++play,memory_order_relaxed);
 #endif
 	}
 #ifdef ADAM_SOUND_QUEUE
 	atomic_store_explicit (&s_cmd_head,head,memory_order_release);
-	atomic_store_explicit (&s_play_samp,play,memory_order_relaxed);
 #endif
 }
 
@@ -666,25 +667,29 @@ static void enqueueSoundCmd (int psg,int r,int v)
 }
 
 /* Emu thread, once per emulated frame (from the VDP interrupt): advance the emu
-   sample clock by one frame of samples (a steady step, no vsync jitter), and
-   re-anchor to live playback only on large drift (startup, pause, over/under). */
+   sample clock by one frame of samples, then track the audio clock. The emu
+   frame rate is vsync-paced (panel ~= but not exactly 60Hz) while audio plays
+   at a true 44100Hz, so the two crystals drift. Rather than snap on drift (an
+   audible ~1-frame jump), nudge the clock toward the ideal lead by a small
+   fraction of the error each frame -- a DLL that low-pass-filters the residual
+   jitter. Hard re-anchor only on large excursions (startup/pause/underrun). */
 void AdamSoundFrameTick (void)
 {
 	int64_t play = atomic_load_explicit (&s_play_samp,memory_order_relaxed);
 	int64_t spf  = 44100 / (IFreq ? IFreq : 60);
-	int64_t lead;
+	int64_t err;
 	if (spf < 1) spf = 1;
 
 	s_emu_samp += spf;
-	lead = s_emu_samp - play;
+	err = (play + (int64_t)SOUND_QUEUE_LEAD_FRAMES * spf) - s_emu_samp;
 
-	if (!s_clock_primed ||
-	    lead < spf ||
-	    lead > (int64_t)(SOUND_QUEUE_LEAD_FRAMES + 2) * spf)
+	if (!s_clock_primed || err > 4*spf || err < -4*spf)
 	{
 		s_emu_samp = play + (int64_t)SOUND_QUEUE_LEAD_FRAMES * spf;
 		s_clock_primed = 1;
 	}
+	else
+		s_emu_samp += err / 16;   /* gentle correction; ~0.36ms steady offset */
 }
 #endif /* ADAM_SOUND_QUEUE */
 
