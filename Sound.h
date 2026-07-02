@@ -20,6 +20,9 @@ void Sound (int r,int v);             /* Write a value to a sound register  */
 #ifdef SOUND_PSG
 void PSG_Sound (int r,int v);         /* Write a value to a PSG register    */
 #endif
+#ifdef ADAM_SOUND_QUEUE
+void AdamSoundFrameTick (void);       /* advance sound-queue clock (per frame)*/
+#endif
 void DecreaseSoundVolume (void);      /* Decrease master volume             */
 void IncreaseSoundVolume (void);      /* Increase master volume             */
 void ToggleSound (void);              /* Toggle sound on/off                */

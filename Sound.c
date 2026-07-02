@@ -194,8 +194,10 @@ void Sound (int r,int v)
 {
  if (soundmode)
   SoundDriver.WriteSoundReg (r,v);
- //should be 32us delay when writing!!!
- SDL_Delay(1);
+ /* No SDL_Delay() here: the old 1ms sleep (meant to mimic the SN76489's ~32us
+    BUSY hold) stalled the emulation thread per write and, on write-heavy
+    frames, made the Android host miss vsyncs -- uneven sound timing. The audio
+    is rendered on a separate sample-clocked thread, so it bought no fidelity. */
 }
 
 #ifdef SOUND_PSG
