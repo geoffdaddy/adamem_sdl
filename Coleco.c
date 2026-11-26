@@ -2987,6 +2987,13 @@ static void UpdateFujiNet (int mode,int dev_id,unsigned DCB)
      if (AdamNet_CharRead (dev,buf,count,&got)==0)
      {
       for (i=0;i<(unsigned)got;++i) RAM[(addr+i)&0xFFFF]=buf[i];
+      /* Write the actual transfer count back into the DCB length field, as
+         the real master 6801 does; clients (e.g. SmartBASIC FujiNet's NFRD)
+         read DCB+3/4 as "bytes transferred" after END_RD_CH. Leaving the
+         requested length here made short packets appear full-sized, so stale
+         buffer tails were consumed as fresh data. */
+      RAM[(DCB+3)&0xFFFF]=got&0xFF;
+      RAM[(DCB+4)&0xFFFF]=(got>>8)&0xFF;
       RAM[DCB]=0x80;
      }
      else RAM[DCB]=0x9B;
